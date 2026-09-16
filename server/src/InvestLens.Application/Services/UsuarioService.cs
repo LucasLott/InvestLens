@@ -17,11 +17,20 @@ namespace InvestLens.Application.Services
             _passwordHasher = passwordHasher;
         }
 
-        public Task Adicionar(AdicionarUsuarioRequest request,
-                              CancellationToken cancellationToken)
+        public async Task Adicionar(AdicionarUsuarioRequest request,
+                                    CancellationToken cancellationToken)
         {
-            // Implementação do método Adicionar
-            throw new NotImplementedException();
+            if (!SenhasSaoIguais(request.Senha, request.ConfirmacaoSenha))
+                throw new InvalidOperationException("As senhas não coincidem.");
+
+            var senhaHash = await _passwordHasher.Hash(request.Senha);
+
+            await _usuarioRepository.Adicionar(request, senhaHash, cancellationToken);
+        }
+
+        private bool SenhasSaoIguais(string senha, string confirmacaoSenha)
+        {
+            return senha == confirmacaoSenha;
         }
     }
 }

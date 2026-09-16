@@ -2,9 +2,9 @@ namespace InvestLens.Application.Interfaces.Security
 {
     public interface IPasswordHasher
     {
-        string Hash(string password);
+        Task<string> Hash(string password);
 
-        bool Verify(string password,
-                    string passwordHash);
+        Task<bool> Verify(string password,
+                          string passwordHash);
     }
 }

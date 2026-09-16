@@ -14,7 +14,7 @@ namespace InvestLens.Infrastructure.Security
         private const int Iterations = 2;
         private const int DegreeOfParallelism = 1;
 
-        public string Hash(string password)
+        public async Task<string> Hash(string password)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(password);
 
@@ -34,8 +34,8 @@ namespace InvestLens.Infrastructure.Security
                                  $"${Convert.ToBase64String(hash)}");
         }
 
-        public bool Verify(string password,
-                           string passwordHash)
+        public async Task<bool> Verify(string password,
+                                       string passwordHash)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(password);
             ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);

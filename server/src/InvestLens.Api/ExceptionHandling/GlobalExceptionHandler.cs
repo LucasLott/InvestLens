@@ -1,4 +1,5 @@
 using FluentValidation;
+using InvestLens.Application.Exceptions;
 using InvestLens.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ namespace InvestLens.Api.ExceptionHandling
         {
             var status = exception switch
             {
+                CredenciaisInvalidasException => 401,
                 ValidationException or BusinessException => 400,
                 BadHttpRequestException request when request.StatusCode is 400 or 401 or 403 or 404 or 409 => request.StatusCode,
                 _ => 500
@@ -24,7 +26,8 @@ namespace InvestLens.Api.ExceptionHandling
             var problem = new ProblemDetails
             {
                 Status = status,
-                Title = status == 500 ? "Erro interno do servidor." : ReasonPhrases.GetReasonPhrase(status)
+                Title = exception is CredenciaisInvalidasException ? "Credenciais inválidas."
+                    : status == 500 ? "Erro interno do servidor." : ReasonPhrases.GetReasonPhrase(status)
             };
 
             problem.Extensions["traceId"] = HttpErrorLogger.TraceId(context);
