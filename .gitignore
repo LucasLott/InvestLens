@@ -55,3 +55,14 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Markdown documentation
+/docs/**/*.[mM][dD]
+
+# .NET local artifacts
+*.log
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
