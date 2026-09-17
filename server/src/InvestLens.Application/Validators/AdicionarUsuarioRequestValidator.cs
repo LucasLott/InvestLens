@@ -13,11 +13,16 @@ namespace InvestLens.Application.Validators
 
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("O email é obrigatório.")
-                .EmailAddress().WithMessage("O email deve ser válido.");
+                .EmailAddress().WithMessage("O email deve ser válido.")
+                .MaximumLength(255).WithMessage("O email não pode exceder 255 caracteres.");
 
             RuleFor(x => x.Senha)
                 .NotEmpty().WithMessage("A senha é obrigatória.")
                 .MinimumLength(6).WithMessage("A senha deve ter no mínimo 6 caracteres.");
+
+            RuleFor(x => x.ConfirmacaoSenha)
+                .NotEmpty().WithMessage("A confirmação da senha é obrigatória.")
+                .Equal(x => x.Senha).WithMessage("As senhas não coincidem.");
         }
     }
 }

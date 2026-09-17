@@ -9,24 +9,34 @@ namespace InvestLens.Application.Services
 {
     public sealed class AuthService(IUsuarioRepository usuarioRepository,
                                     IPasswordHasher passwordHasher,
-                                    IValidator<LoginRequest> validator) : IAuthService
+                                    IValidator<LoginRequest> validator,
+                                    IJwtTokenGenerator jwtTokenGenerator) : IAuthService
     {
+        private readonly IUsuarioRepository _usuarioRepository = usuarioRepository;
+        private readonly IPasswordHasher _passwordHasher = passwordHasher;
+        private readonly IValidator<LoginRequest> _validator = validator;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
+
         public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
         {
-            await validator.ValidateAndThrowAsync(request, cancellationToken);
+            await _validator.ValidateAndThrowAsync(request, cancellationToken);
 
-            var usuario = await usuarioRepository.ObterDadosLoginAsync(request.Email, cancellationToken);
+            var usuario = await _usuarioRepository.ObterDadosLoginAsync(request.Email, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (usuario is null || !usuario.Ativo || !await passwordHasher.Verify(request.Senha, usuario.SenhaHash))
+            if (usuario is null || !usuario.Ativo || !await _passwordHasher.Verify(request.Senha, usuario.SenhaHash))
                 throw new CredenciaisInvalidasException();
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var token = _jwtTokenGenerator.Generate(usuario.IdUsuario, usuario.Codigo, usuario.Nome);
 
             return new LoginResponse
             {
                 IdUsuario = usuario.IdUsuario,
                 Codigo = usuario.Codigo,
                 Nome = usuario.Nome,
-                Email = usuario.Email
+                Email = usuario.Email,
+                Token = token
             };
         }
     }

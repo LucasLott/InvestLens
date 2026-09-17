@@ -13,6 +13,10 @@ namespace InvestLens.Api.Extensions
         public static void AddApiLogging(this WebApplicationBuilder builder)
         {
             builder.Logging.ClearProviders();
+
+            // As falhas HTTP são registradas pelo HttpErrorLogger, sem detalhes do token.
+            builder.Logging.AddFilter("Microsoft.AspNetCore.Authentication", LogLevel.None);
+            
             builder.Host.UseNLog();
         }
 
@@ -37,7 +41,20 @@ namespace InvestLens.Api.Extensions
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.Configure<ExceptionHandlerOptions>(options => options.SuppressDiagnosticsCallback = _ => true);
             services.AddOptions<SwaggerSettings>().Bind(configuration.GetSection(SwaggerSettings.SectionName));
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "Informe o AccessToken retornado pelo login."
+                });
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                });
+            });
             services.AddOptions<SwaggerGenOptions>().Configure<IOptions<SwaggerSettings>>((options, settings) =>
             {
                 var swagger = settings.Value;

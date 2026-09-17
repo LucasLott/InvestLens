@@ -14,7 +14,7 @@ namespace InvestLens.IntegrationTests
         [Fact]
         public async Task ApiStartsWithoutDatabaseAndExposesHealthSwaggerAndProblemDetails()
         {
-            await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+            await using var factory = new TestApiFactory().WithWebHostBuilder(builder =>
                 builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(
                     new Dictionary<string, string?>
                     {

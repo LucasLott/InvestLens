@@ -6,12 +6,16 @@ namespace InvestLens.Infrastructure.Database.Connection
 {
     public sealed class DbConnectionFactory(IConfiguration configuration) : IDbConnectionFactory
     {
+        private readonly IConfiguration _configuration = configuration;
+
         // A configuração só é exigida sob demanda. O consumidor abre e descarta a conexão.
         public DbConnection CreateConnection()
         {
-            var value = configuration.GetConnectionString("InvestLens");
+            var value = _configuration.GetConnectionString("InvestLens");
+
             if (string.IsNullOrWhiteSpace(value))
                 throw new DatabaseException("A configuração de conexão InvestLens não foi fornecida.");
+
             return new SqlConnection(value);
         }
     }

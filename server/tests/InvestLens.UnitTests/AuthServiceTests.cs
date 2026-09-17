@@ -18,7 +18,8 @@ namespace InvestLens.UnitTests
             var repository = new UsuarioDouble(CreateUser());
             var hasher = new HasherDouble(true);
             using var cancellation = new CancellationTokenSource();
-            var service = new AuthService(repository, hasher, new LoginRequestValidator());
+            var generator = new JwtDouble();
+            var service = new AuthService(repository, hasher, new LoginRequestValidator(), generator);
 
             var response = await service.LoginAsync(new LoginRequest { Email = "user@example.com", Senha = "x" }, cancellation.Token);
 
@@ -29,6 +30,11 @@ namespace InvestLens.UnitTests
             Assert.Equal("user@example.com", repository.Email);
             Assert.Equal(cancellation.Token, repository.Token);
             Assert.Equal(("x", "stored-hash"), hasher.Verified);
+            Assert.Equal((7, "007", "Usuário"), generator.User);
+            Assert.Equal(1, generator.Calls);
+            Assert.Same(generator.Result, response.Token);
+            Assert.Equal("test-access-token", response.Token.AccessToken);
+            Assert.Equal(generator.Result.Expiration, response.Token.Expiration);
         }
 
         [Theory]
@@ -39,13 +45,15 @@ namespace InvestLens.UnitTests
         {
             var repository = new UsuarioDouble(found ? CreateUser(active) : null);
             var hasher = new HasherDouble(verified);
-            var service = new AuthService(repository, hasher, new LoginRequestValidator());
+            var generator = new JwtDouble();
+            var service = new AuthService(repository, hasher, new LoginRequestValidator(), generator);
 
             var exception = await Assert.ThrowsAsync<CredenciaisInvalidasException>(() =>
                 service.LoginAsync(new LoginRequest { Email = "user@example.com", Senha = "x" }, CancellationToken.None));
 
             Assert.Equal("Credenciais inválidas.", exception.Message);
             Assert.Equal(verifyCalls, hasher.Calls);
+            Assert.Equal(0, generator.Calls);
         }
 
         [Theory]
@@ -59,7 +67,8 @@ namespace InvestLens.UnitTests
         {
             var repository = new UsuarioDouble(CreateUser());
             var hasher = new HasherDouble(true);
-            var service = new AuthService(repository, hasher, new LoginRequestValidator());
+            var generator = new JwtDouble();
+            var service = new AuthService(repository, hasher, new LoginRequestValidator(), generator);
             await Assert.ThrowsAsync<ValidationException>(() => service.LoginAsync(
                 new LoginRequest { Email = email!, Senha = password! }, CancellationToken.None));
             Assert.Null(repository.Email);
@@ -85,7 +94,8 @@ namespace InvestLens.UnitTests
             using var cancellation = new CancellationTokenSource();
             var repository = new UsuarioDouble(CreateUser()) { Cancel = cancellation.Cancel };
             var hasher = new HasherDouble(true);
-            var service = new AuthService(repository, hasher, new LoginRequestValidator());
+            var generator = new JwtDouble();
+            var service = new AuthService(repository, hasher, new LoginRequestValidator(), generator);
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.LoginAsync(
                 new LoginRequest { Email = "user@example.com", Senha = "x" }, cancellation.Token));
             Assert.Equal(0, hasher.Calls);
@@ -96,6 +106,23 @@ namespace InvestLens.UnitTests
             IdUsuario = 7, Codigo = "007", Nome = "Usuário", Email = "user@example.com",
             SenhaHash = "stored-hash", Ativo = active
         };
+
+        private sealed class JwtDouble : IJwtTokenGenerator
+        {
+            public int Calls { get; private set; }
+            public (int Id, string Codigo, string Nome)? User { get; private set; }
+            public Token Result { get; } = new()
+            {
+                AccessToken = "test-access-token",
+                Expiration = new DateTime(2030, 1, 2, 3, 4, 5, DateTimeKind.Utc)
+            };
+            public Token Generate(int idUsuario, string codigo, string nome)
+            {
+                Calls++;
+                User = (idUsuario, codigo, nome);
+                return Result;
+            }
+        }
 
         private sealed class UsuarioDouble(DadosLogin? user) : IUsuarioRepository
         {
@@ -110,7 +137,7 @@ namespace InvestLens.UnitTests
                 cancellationToken.ThrowIfCancellationRequested();
                 return Task.FromResult(user);
             }
-            public Task Adicionar(AdicionarUsuarioRequest request, CancellationToken cancellationToken) =>
+            public Task Adicionar(AdicionarUsuarioRequest request, string senhaHash, CancellationToken cancellationToken) =>
                 throw new NotSupportedException();
         }
 
@@ -118,12 +145,12 @@ namespace InvestLens.UnitTests
         {
             public int Calls { get; private set; }
             public (string Password, string Hash)? Verified { get; private set; }
-            public string Hash(string password) => throw new NotSupportedException();
-            public bool Verify(string password, string passwordHash)
+            public Task<string> Hash(string password) => throw new NotSupportedException();
+            public Task<bool> Verify(string password, string passwordHash)
             {
                 Calls++;
                 Verified = (password, passwordHash);
-                return verified;
+                return Task.FromResult(verified);
             }
         }
     }

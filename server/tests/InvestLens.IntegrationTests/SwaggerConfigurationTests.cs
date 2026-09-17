@@ -16,7 +16,7 @@ namespace InvestLens.IntegrationTests
         [InlineData(true, "Development", "custom-version")]
         public async Task SwaggerUsesConfiguredMetadataAndBuildMode(bool enableSwaggerProd, string environment, string version)
         {
-            await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+            await using var factory = new TestApiFactory().WithWebHostBuilder(builder =>
             {
                 builder.UseEnvironment(environment);
                 builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(
