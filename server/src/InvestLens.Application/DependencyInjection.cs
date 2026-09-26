@@ -13,6 +13,7 @@ namespace InvestLens.Application
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<RefreshTokenService>();
 
             return services;
         }

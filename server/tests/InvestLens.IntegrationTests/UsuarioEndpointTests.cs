@@ -15,7 +15,7 @@ namespace InvestLens.IntegrationTests
     public class UsuarioEndpointTests
     {
         [Theory]
-        [InlineData("user@example.com", "password", "password", "success", 200)]
+        [InlineData("user@example.com", "password", "password", "success", 204)]
         [InlineData("invalid", "password", "password", "success", 400)]
         [InlineData("user@example.com", "short", "short", "success", 400)]
         [InlineData("user@example.com", "password", "different", "success", 400)]
@@ -40,7 +40,7 @@ namespace InvestLens.IntegrationTests
             Assert.DoesNotContain(senha, body);
             Assert.DoesNotContain("$argon2id", body);
             Assert.DoesNotContain("sensitive-marker", body);
-            if (expectedStatus == 200)
+            if (expectedStatus == 204)
             {
                 Assert.Equal(1, repository.Calls);
                 Assert.NotNull(repository.Hash);

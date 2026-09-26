@@ -1,7 +1,3 @@
-using InvestLens.Application.DTOs.Usuario;
-using InvestLens.Application.Interfaces.Services.Usuario;
-using Microsoft.AspNetCore.Mvc;
-
 namespace InvestLens.Api.Controllers
 {
     [ApiController]
@@ -15,7 +11,7 @@ namespace InvestLens.Api.Controllers
         {
             await _usuarioService.Adicionar(request, cancellationToken);
 
-            return Ok();
+            return NoContent();
         }
     }
 }

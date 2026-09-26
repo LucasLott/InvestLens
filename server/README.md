@@ -43,3 +43,36 @@ Startup é Information; 400/401/403/404/409 são Warning; 5xx são Error. Um mar
 O diagnóstico contém status, método, template da rota (ou `[unmatched]`), traceId, tipo da exception e métodos da stack para 5xx. Não copia mensagens arbitrárias de exceptions, valores da URL, headers, corpos ou dados de exceptions. Isso evita que credenciais apareçam mesmo em falhas técnicas.
 
 Referências: [IExceptionHandler no .NET 10](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-10.0), [NLog File target e retenção](https://github.com/NLog/NLog/wiki/File-target), [Swashbuckle.AspNetCore](https://www.nuget.org/packages/Swashbuckle.AspNetCore).
+## Login, renovação e logout
+
+Execute `dbObjects/tables/001_CreateTables.sql` e depois
+`dbObjects/procedures/st_RefreshToken.sql` no banco de destino antes de publicar a API.
+As tabelas ILAUT001/ILAUT002 guardam sessões e hashes SHA-256, nunca o refresh token original.
+Cada token contém 256 bits aleatórios. A sessão expira sete dias após o login; a rotação
+não prolonga esse prazo. Tokens consumidos são preservados para detectar reutilização.
+A limpeza deve excluir os tokens e a sessão somente após a expiração da sessão.
+
+- `POST /api/auth/login`: email/senha; retorna o contrato atual com JWT e grava o cookie de refresh.
+- `POST /api/auth/refresh`: sem corpo; usa o cookie e retorna outro JWT, substituindo o cookie.
+- `POST /api/auth/revoke`: sem corpo; revoga a sessão do cookie, apaga o cookie e retorna 204.
+  É idempotente e funciona mesmo com JWT expirado. Outras sessões do usuário permanecem válidas.
+
+O cookie `__Host-InvestLens.Refresh` usa HttpOnly, Secure, SameSite=Strict e Path=/,
+sem Domain. Use HTTPS também no desenvolvimento (`--launch-profile https`).
+O navegador deve enviar `X-InvestLens-CSRF: 1` nas três operações e usar a API na mesma
+origem do frontend (por exemplo, por proxy). Não habilite CORS com credenciais para origens arbitrárias.
+O refresh token não é retornado no JSON, nem fica acessível ao JavaScript.
+
+No cliente, mantenha o access token em memória. Faça login primeiro; ao expirar o JWT
+ou receber 401, execute uma única renovação compartilhada entre requisições concorrentes,
+atualize o access token e repita a operação original uma vez. Se a renovação retornar 401,
+volte ao login. Não entre em loop de refresh e não repita automaticamente um refresh cujo
+resultado se perdeu na rede: o token pode já ter sido consumido. Coordene também as abas
+que compartilham o cookie. A pasta `client/` ainda não contém uma aplicação.
+
+A reutilização de um token consumido revoga toda a sua sessão, inclusive o token sucessor.
+A procedure serializa rotação e revogação por sessão com bloqueio transacional no SQL Server.
+Usuários inativos não podem renovar. Falhas no banco não são convertidas em sucesso de logout.
+JWTs já emitidos permanecem válidos até sua expiração (`Authentication:Jwt:ExpirationInMinutes`,
+atualmente 60 minutos); a revogação impede novas renovações, não invalida imediatamente esses JWTs.
+Os testes HTTP usam persistência substituta; validar também a procedure em SQL Server antes da publicação.

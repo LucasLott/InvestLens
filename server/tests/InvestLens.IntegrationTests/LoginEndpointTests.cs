@@ -93,6 +93,8 @@ namespace InvestLens.IntegrationTests
                     services.AddControllers().AddApplicationPart(typeof(JwtProbeController).Assembly);
                     services.RemoveAll<IUsuarioRepository>();
                     services.AddSingleton<IUsuarioRepository>(repository);
+                    services.RemoveAll<InvestLens.Application.Interfaces.Repositories.IRefreshTokenRepository>();
+                    services.AddSingleton<InvestLens.Application.Interfaces.Repositories.IRefreshTokenRepository>(new RefreshStore());
                 });
             });
 
