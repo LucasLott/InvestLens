@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using InvestLens.Application.Authentication;
 using InvestLens.Application.DTOs.Auth;
 using InvestLens.Application.Interfaces.Security;
 using InvestLens.Infrastructure.Configuration;
@@ -27,9 +28,9 @@ namespace InvestLens.Infrastructure.Security
             var expiration = issuedAt.AddMinutes(settings.ExpirationInMinutes).UtcDateTime;
 
             Claim[] claims = [
-                new Claim("IdUsuario", idUsuario.ToString(CultureInfo.InvariantCulture)),
-                new Claim("Codigo", codigo),
-                new Claim("Nome", nome)
+                new Claim(JwtClaimNames.IdUsuario, idUsuario.ToString(CultureInfo.InvariantCulture)),
+                new Claim(JwtClaimNames.Codigo, codigo),
+                new Claim(JwtClaimNames.Nome, nome)
             ];
 
             var jwt = new JwtSecurityToken(issuer: settings.Issuer,

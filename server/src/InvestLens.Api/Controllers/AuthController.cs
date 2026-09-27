@@ -1,3 +1,9 @@
+using InvestLens.Application.DTOs.Auth;
+using InvestLens.Application.Exceptions;
+using InvestLens.Application.Interfaces.Services.Auth;
+using InvestLens.Application.Services;
+using Microsoft.AspNetCore.Mvc;
+
 namespace InvestLens.Api.Controllers
 {
     [ApiController]

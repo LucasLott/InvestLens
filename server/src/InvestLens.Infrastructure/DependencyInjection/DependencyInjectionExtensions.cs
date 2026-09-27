@@ -1,5 +1,6 @@
 using InvestLens.Application.Interfaces.Security;
 using InvestLens.Application.Interfaces.Repositories.Usuario;
+using InvestLens.Application.Interfaces.Repositories.Configuracao;
 using InvestLens.Infrastructure.Repositories;
 using InvestLens.Infrastructure.Database.Connection;
 using InvestLens.Infrastructure.Security;
@@ -16,6 +17,7 @@ namespace InvestLens.Infrastructure.DependencyInjection
         {
             services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<IConfiguracaoRepository, ConfiguracaoRepository>();
             services.AddScoped<InvestLens.Application.Interfaces.Repositories.IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidator>();

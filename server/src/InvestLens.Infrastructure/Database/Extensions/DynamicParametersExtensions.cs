@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using InvestLens.Domain.Exceptions;
+using InvestLens.Application.Exceptions;
 using Microsoft.Data.SqlClient;
 
 namespace InvestLens.Infrastructure.Database.Extensions
@@ -19,9 +20,29 @@ namespace InvestLens.Infrastructure.Database.Extensions
             // o contrato SQL conhecido, sem interpretar parâmetros parciais como sucesso.
             if (sqlException is not null)
             {
-                if (sqlException.Number == 50001 && sqlException.State == 1 &&
-                    sqlException.Procedure is "st_UsuarioAdd" or "dbo.st_UsuarioAdd")
-                    throw new BusinessException();
+                if (sqlException.Number is 2601 or 2627 &&
+                    sqlException.Procedure is "st_ConfiguracaoAdd" or "dbo.st_ConfiguracaoAdd")
+                    throw new ConfiguracaoJaExisteException();
+
+                if (sqlException.Number == 50001)
+                {
+                    if (sqlException.Procedure is "st_ConfiguracaoAdd" or "dbo.st_ConfiguracaoAdd")
+                    {
+                        if (sqlException.State == 2) throw new ConfiguracaoNaoEncontradaException();
+                        if (sqlException.State == 3) throw new ConfiguracaoJaExisteException();
+                        if (sqlException.State == 1) throw new BusinessException();
+                    }
+
+                    if (sqlException.Procedure is "st_ConfiguracaoUpd" or "dbo.st_ConfiguracaoUpd")
+                    {
+                        if (sqlException.State is 2 or 3) throw new ConfiguracaoNaoEncontradaException();
+                        if (sqlException.State == 1) throw new BusinessException();
+                    }
+
+                    if (sqlException.State == 1 &&
+                        sqlException.Procedure is "st_UsuarioAdd" or "dbo.st_UsuarioAdd")
+                        throw new BusinessException();
+                }
 
                 throw new DatabaseException("Falha na execução da procedure.", sqlException);
             }

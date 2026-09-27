@@ -1,3 +1,7 @@
+using InvestLens.Application.DTOs.Usuario;
+using InvestLens.Application.Interfaces.Services.Usuario;
+using Microsoft.AspNetCore.Mvc;
+
 namespace InvestLens.Api.Controllers
 {
     [ApiController]

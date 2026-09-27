@@ -1,3 +1,8 @@
+using InvestLens.Application.DTOs.Auth;
+using InvestLens.Application.Exceptions;
+using InvestLens.Application.Interfaces.Repositories;
+using InvestLens.Application.Interfaces.Security;
+
 using System.Security.Cryptography;
 using System.Text;
 

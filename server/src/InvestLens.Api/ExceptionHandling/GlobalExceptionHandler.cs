@@ -14,6 +14,8 @@ namespace InvestLens.Api.ExceptionHandling
             var status = exception switch
             {
                 CredenciaisInvalidasException => 401,
+                ConfiguracaoNaoEncontradaException => 404,
+                ConfiguracaoJaExisteException => 409,
                 ValidationException or BusinessException => 400,
                 BadHttpRequestException request when request.StatusCode is 400 or 401 or 403 or 404 or 409 => request.StatusCode,
                 _ => 500
@@ -27,6 +29,8 @@ namespace InvestLens.Api.ExceptionHandling
             {
                 Status = status,
                 Title = exception is CredenciaisInvalidasException ? "Credenciais inválidas."
+                    : exception is ConfiguracaoNaoEncontradaException ? "Configuração não encontrada."
+                    : exception is ConfiguracaoJaExisteException ? "Conflito ao criar configuração."
                     : status == 500 ? "Erro interno do servidor." : ReasonPhrases.GetReasonPhrase(status)
             };
 

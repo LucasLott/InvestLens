@@ -1,6 +1,7 @@
 using FluentValidation;
 using InvestLens.Application.Interfaces.Services.Auth;
 using InvestLens.Application.Interfaces.Services.Usuario;
+using InvestLens.Application.Interfaces.Services.Configuracao;
 using InvestLens.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,7 @@ namespace InvestLens.Application
         {
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<IConfiguracaoService, ConfiguracaoService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<RefreshTokenService>();
 
