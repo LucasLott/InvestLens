@@ -32,11 +32,17 @@ namespace InvestLens.IntegrationTests
             context.Request.Path = "/sensitive-marker";
             context.Request.QueryString = new QueryString("?token=sensitive-marker");
             context.Request.Headers.Accept = "text/html"; // Exercita o fallback JSON seguro.
+            string[] segredos = ["access-token-marcador", "refresh-token-marcador", "jwt-secret-marcador",
+                "senha-marcador", "$argon2id$hash-marcador"];
+            context.Request.Headers.Authorization = "Bearer " + segredos[0];
+            context.Request.Headers.Cookie = "refresh=" + segredos[1];
+            context.Request.Body = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(
+                JsonSerializer.Serialize(new { senha = segredos[3], hash = segredos[4] })));
             context.Response.Body = new MemoryStream();
             Exception exception;
             try
             {
-                throw status == 500 ? new InvalidOperationException("sensitive-marker")
+                throw status == 500 ? new InvalidOperationException("sensitive-marker " + string.Join(" ", segredos))
                     : new BadHttpRequestException("sensitive-marker", status);
             }
             catch (Exception caught) { exception = caught; }
@@ -53,6 +59,11 @@ namespace InvestLens.IntegrationTests
             Assert.Equal(status == 500 ? LogLevel.Error : LogLevel.Warning, entry.Level);
             Assert.Contains("test-trace", entry.Message);
             Assert.DoesNotContain("sensitive-marker", entry.Message);
+            foreach (var segredo in segredos)
+            {
+                Assert.DoesNotContain(segredo, body);
+                Assert.DoesNotContain(segredo, entry.Message);
+            }
             if (status == 500) Assert.Contains(nameof(HandlerReturnsSafeProblemAndLogsOnlyOnce), entry.Message);
         }
 

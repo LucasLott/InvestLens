@@ -26,7 +26,8 @@ namespace InvestLens.IntegrationTests
         [InlineData("PUT", "sem-token", 401)]
         public async Task EndpointsExigemBearerESameUser(string method, string cenario, int statusEsperado)
         {
-            var repository = new ConfiguracaoDouble { Cenario = method == "GET" && cenario == "propria" ? "existente" : null };
+            var repository = new ConfiguracaoDouble { Cenario = method != "POST" && cenario == "propria" ? "existente" : null };
+            if (repository.Cenario == "existente") repository.Preparar(15);
             await using var factory = CriarFactory(repository);
             using var client = factory.CreateClient();
             if (cenario != "sem-token") client.DefaultRequestHeaders.Authorization =
@@ -158,23 +159,23 @@ namespace InvestLens.IntegrationTests
             public string? Cenario { get; init; }
             public DateTime? DataAlteracao { get; private set; }
 
+            public void Preparar(int idUsuario) => configuracao = Criar(idUsuario, new ConfiguracaoRequest
+            {
+                PLMaximo = 15, DYMinimo = 6, ROEMinimo = 15, DividaPatrimonioMaximo = 1,
+                MargemLiquidaMinimo = 20, RetornoPreco = 6
+            }, null);
+
             public Task<ConfiguracaoResponse?> ObterAsync(int idUsuario, CancellationToken cancellationToken)
             {
                 Calls++;
                 if (Cenario == "nao-encontrada") return Task.FromResult<ConfiguracaoResponse?>(null);
-                if (Cenario == "existente" && configuracao is null)
-                    configuracao = Criar(idUsuario, new ConfiguracaoRequest
-                    {
-                        PLMaximo = 15, DYMinimo = 6, ROEMinimo = 15, DividaPatrimonioMaximo = 1,
-                        MargemLiquidaMinimo = 20, RetornoPreco = 6
-                    }, null);
-                return Task.FromResult(configuracao);
+                return Task.FromResult(configuracao?.IdUsuario == idUsuario ? configuracao : null);
             }
 
             public Task AdicionarAsync(int idUsuario, ConfiguracaoRequest request, CancellationToken cancellationToken)
             {
                 Calls++;
-                if (Cenario == "conflito") throw new ConfiguracaoJaExisteException();
+                if (Cenario == "conflito" || configuracao is not null) throw new ConfiguracaoJaExisteException();
                 configuracao = Criar(idUsuario, request, null);
                 return Task.CompletedTask;
             }
@@ -182,7 +183,7 @@ namespace InvestLens.IntegrationTests
             public Task AlterarAsync(int idUsuario, ConfiguracaoRequest request, CancellationToken cancellationToken)
             {
                 Calls++;
-                if (Cenario == "nao-encontrada") throw new ConfiguracaoNaoEncontradaException();
+                if (Cenario == "nao-encontrada" || configuracao?.IdUsuario != idUsuario) throw new ConfiguracaoNaoEncontradaException();
                 DataAlteracao = DateTime.UtcNow;
                 configuracao = Criar(idUsuario, request, DataAlteracao);
                 return Task.CompletedTask;
