@@ -4,6 +4,7 @@ import { App } from './App'
 import './styles/tokens.css'
 import './styles/global.css'
 import './styles/forms.css'
+import './styles/configuration.css'
 
 const container = document.getElementById('root')
 if (!container) throw new Error('Elemento de inicialização não encontrado.')
