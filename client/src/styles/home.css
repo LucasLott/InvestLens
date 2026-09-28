@@ -1,0 +1,80 @@
+.home {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(ellipse at 90% 30%, var(--color-accent-soft) 0, transparent 48%);
+}
+.home main { flex: 1; }
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 112px;
+  border-bottom: 1px solid var(--color-border);
+}
+.wordmark { display: inline-flex; align-items: baseline; min-height: 44px; font-size: 1.7rem; font-weight: 750; letter-spacing: -0.055em; text-decoration: none; }
+.wordmark > span:first-child { color: var(--color-primary); }
+.brand-dot { width: 0.35rem; height: 0.35rem; margin-left: var(--space-1); background: var(--color-accent); border-radius: 50%; }
+.stage-label { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-muted); font-size: 0.75rem; }
+.stage-label > span, .panel-label > span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; }
+.hero {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: center;
+  gap: var(--space-8);
+  padding-block: clamp(3rem, 6vw, 5rem);
+}
+.hero-copy { min-width: 0; }
+.hero h1 { margin-block: var(--space-5); font-size: clamp(2.8rem, 5.3vw, 4.75rem); font-weight: 650; line-height: 1.08; letter-spacing: -0.055em; }
+.hero h1 span { color: var(--color-primary); }
+.hero-description { max-width: 28rem; color: var(--color-muted); font-size: clamp(1.05rem, 1.5vw, 1.2rem); line-height: 1.75; }
+.hero .button { margin-top: var(--space-6); }
+.hero .button span { font-size: 1.25rem; }
+.hero-note { margin-top: var(--space-5); color: var(--color-muted); font-size: 0.75rem; }
+.brand-panel {
+  position: relative;
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-panel);
+}
+.panel-label { display: flex; align-items: center; gap: var(--space-2); color: var(--color-muted); font-size: 0.7rem; letter-spacing: 0.06em; }
+.brand-panel img { width: 100%; max-width: 23rem; margin-inline: auto; }
+.brand-panel figcaption { padding-top: var(--space-4); border-top: 1px solid var(--color-border); font-size: 0.8rem; color: var(--color-muted); }
+.brand-panel figcaption span { color: var(--color-primary); }
+.principles {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: var(--space-7);
+  padding-block: var(--space-7) var(--space-8);
+  border-top: 1px solid var(--color-border);
+  scroll-margin-top: var(--space-6);
+}
+.principles h2 { margin-top: var(--space-3); font-size: 1.5rem; line-height: 1.4; font-weight: 600; letter-spacing: -0.035em; }
+.principle-number { color: var(--color-primary); font-size: 0.75rem; font-weight: 600; }
+.principle h3 { margin-block: var(--space-3) var(--space-2); font-size: 1rem; font-weight: 600; }
+.principle p { color: var(--color-muted); font-size: 0.9rem; max-width: 28ch; }
+.site-footer { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding-block: var(--space-5); border-top: 1px solid var(--color-border); color: var(--color-muted); font-size: 0.75rem; }
+.site-footer > span { color: var(--color-text); font-weight: 650; }
+@media (max-width: 900px) {
+  .site-header { min-height: 88px; }
+  .hero { gap: var(--space-6); }
+  .brand-panel { padding: var(--space-4); }
+  .principles { grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+  .principles-intro { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .site-header { flex-wrap: wrap; padding-block: var(--space-4); gap: var(--space-2); }
+  .wordmark { font-size: 1.5rem; }
+  .stage-label { font-size: 0.68rem; }
+  .hero { grid-template-columns: 1fr; gap: var(--space-7); }
+  .hero h1 { font-size: clamp(2.75rem, 10vw, 3.75rem); }
+  .hero .eyebrow { max-width: 30ch; }
+  .brand-panel img { max-width: 18rem; }
+  .principles { grid-template-columns: 1fr; gap: var(--space-6); }
+  .principle { padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
+  .principle p { max-width: 40ch; }
+  .site-footer { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+}
