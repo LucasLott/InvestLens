@@ -15,6 +15,7 @@ namespace InvestLens.Api
             var app = builder.Build();
             app.UseApiErrors();
             app.UseApiDocumentation();
+            app.UseCors("InvestLensClient");
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

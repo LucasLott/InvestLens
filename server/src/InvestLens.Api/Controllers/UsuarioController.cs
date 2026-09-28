@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvestLens.Api.Controllers
 {
     [ApiController]
-    [Route("api/usuario")]
+    [Route("usuario")]
     public class UsuarioController(IUsuarioService usuarioService) : ControllerBase
     {
         private readonly IUsuarioService _usuarioService = usuarioService;

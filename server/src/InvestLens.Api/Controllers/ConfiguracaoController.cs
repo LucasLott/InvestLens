@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvestLens.Api.Controllers
 {
     [ApiController]
-    [Route("api/usuarios/{idUsuario:int}/configuracao")]
+    [Route("usuarios/{idUsuario:int}/configuracao")]
     [Authorize(Policy = AuthorizationPolicies.SameUser)]
     public sealed class ConfiguracaoController(IConfiguracaoService configuracaoService) : ControllerBase
     {

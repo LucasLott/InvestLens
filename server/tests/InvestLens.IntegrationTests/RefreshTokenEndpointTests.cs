@@ -22,14 +22,14 @@ public class RefreshTokenEndpointTests
         client.DefaultRequestHeaders.Add("Origin", "https://localhost");
         client.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
         client.DefaultRequestHeaders.Add("X-InvestLens-CSRF", "1");
-        using var login = await client.PostAsJsonAsync("/api/auth/login", new { email = "a@b.com", senha = "password" });
+        using var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email = "a@b.com", senha = "password" });
         login.EnsureSuccessStatusCode();
         var original = Cookie(login);
         var setCookie = login.Headers.GetValues("Set-Cookie").Single();
         Assert.Contains("secure", setCookie);
         Assert.Contains("httponly", setCookie);
         Assert.Contains("samesite=strict", setCookie);
-        Assert.Contains("path=/", setCookie);
+        Assert.Contains("path=/api/v1/auth", setCookie);
         Assert.DoesNotContain("domain=", setCookie);
         Assert.True(login.Headers.CacheControl?.NoStore);
         Assert.DoesNotContain(original.Split('=')[1], await login.Content.ReadAsStringAsync());
@@ -44,7 +44,7 @@ public class RefreshTokenEndpointTests
         Assert.Equal(HttpStatusCode.Unauthorized, (await Post(client, "refresh", original)).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, (await Post(client, "refresh", rotated)).StatusCode);
 
-        using var secondLogin = await client.PostAsJsonAsync("/api/auth/login", new { email = "a@b.com", senha = "password" });
+        using var secondLogin = await client.PostAsJsonAsync("/api/v1/auth/login", new { email = "a@b.com", senha = "password" });
         var second = Cookie(secondLogin);
         using var logout = await Post(client, "revoke", second);
         Assert.Equal(HttpStatusCode.NoContent, logout.StatusCode);
@@ -74,7 +74,7 @@ public class RefreshTokenEndpointTests
         await using var factory = CreateFactory(new());
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add("Origin", "https://attacker.example");
-        using var response = await client.PostAsJsonAsync("/api/auth/" + endpoint, new { email = "a@b.com", senha = "password" });
+        using var response = await client.PostAsJsonAsync("/api/v1/auth/" + endpoint, new { email = "a@b.com", senha = "password" });
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
@@ -90,7 +90,7 @@ public class RefreshTokenEndpointTests
     private static string Cookie(HttpResponseMessage response) => response.Headers.GetValues("Set-Cookie").Single().Split(';')[0];
     private static Task<HttpResponseMessage> Post(HttpClient client, string endpoint, string? cookie)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "/api/auth/" + endpoint);
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/auth/" + endpoint);
         if (cookie is not null) request.Headers.Add("Cookie", cookie);
         return client.SendAsync(request);
     }

@@ -1,10 +1,20 @@
 import { Route, Routes } from 'react-router-dom'
-import { HomePage } from '../pages/HomePage'
+import { AppLayout } from '../components/layout/AppLayout'
+import { AuthenticatedHomePage } from '../pages/AuthenticatedHomePage'
+import { ConfigurationPlaceholderPage } from '../pages/ConfigurationPlaceholderPage'
+import { LoginPage } from '../pages/LoginPage'
+import { NotFoundPage } from '../pages/NotFoundPage'
+import { ProtectedRoute } from './ProtectedRoute'
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route path="/" element={<AuthenticatedHomePage />} />
+        <Route path="/configuracao" element={<ConfigurationPlaceholderPage />} />
+      </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

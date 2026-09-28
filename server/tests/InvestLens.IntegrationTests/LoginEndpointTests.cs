@@ -31,7 +31,7 @@ namespace InvestLens.IntegrationTests
             var repository = new UsuarioDouble(active, failure);
             await using var factory = CreateFactory(repository);
             using var client = factory.CreateClient();
-            using var response = await client.PostAsJsonAsync("/api/auth/login", new { email, senha = password });
+            using var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, senha = password });
             Assert.Equal(expectedStatus, (int)response.StatusCode);
             var body = await response.Content.ReadAsStringAsync();
             Assert.DoesNotContain("correct-password", body);
@@ -70,7 +70,7 @@ namespace InvestLens.IntegrationTests
             await using var factory = CreateFactory(new UsuarioDouble(true, false));
             using var client = factory.CreateClient();
             using var json = JsonDocument.Parse(await client.GetStringAsync("/swagger/v1/swagger.json"));
-            var operation = json.RootElement.GetProperty("paths").GetProperty("/api/auth/login").GetProperty("post");
+            var operation = json.RootElement.GetProperty("paths").GetProperty("/api/v1/auth/login").GetProperty("post");
             var bearer = json.RootElement.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer");
             Assert.Equal("http", bearer.GetProperty("type").GetString());
             Assert.Equal("bearer", bearer.GetProperty("scheme").GetString());

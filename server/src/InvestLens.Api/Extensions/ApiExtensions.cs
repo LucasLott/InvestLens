@@ -1,5 +1,6 @@
 using InvestLens.Api.ExceptionHandling;
 using InvestLens.Api.Configuration;
+using InvestLens.Api.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
@@ -22,7 +23,15 @@ namespace InvestLens.Api.Extensions
 
         public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+            services.AddCors(options => options.AddPolicy("InvestLensClient", policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                    .AllowCredentials()
+                    .WithHeaders("Content-Type", "Authorization", "X-InvestLens-CSRF")
+                    .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
+            }));
+            services.AddControllers(options => options.Conventions.Add(new ApiVersionRouteConvention())).ConfigureApiBehaviorOptions(options =>
             {
                 // Model binding pode incluir valores de entrada nos erros.
                 options.InvalidModelStateResponseFactory = context =>

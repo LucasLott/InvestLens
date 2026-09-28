@@ -7,11 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace InvestLens.Api.Controllers
 {
     [ApiController]
-    [Route("api/auth")]
+    [Route("auth")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public sealed class AuthController(IAuthService authService, RefreshTokenService refreshTokens) : ControllerBase
     {
-        private const string CookieName = "__Host-InvestLens.Refresh";
+        private const string SecureCookieName = "__Host-InvestLens.Refresh";
+        private const string DevelopmentCookieName = "InvestLens.Refresh";
 
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -72,10 +73,12 @@ namespace InvestLens.Api.Controllers
                     throw new BadHttpRequestException("Invalid browser request.", StatusCodes.Status403Forbidden);
         }
 
-        private static CookieOptions CookieOptions() => new()
+        private string CookieName => Request.IsHttps ? SecureCookieName : DevelopmentCookieName;
+
+        private CookieOptions CookieOptions() => new()
         {
-            HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict,
-            Path = "/", IsEssential = true
+            HttpOnly = true, Secure = Request.IsHttps, SameSite = SameSiteMode.Strict,
+            Path = "/api/v1/auth", IsEssential = true
         };
 
         private void SetCookie(RefreshCookie cookie)
