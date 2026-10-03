@@ -15,15 +15,16 @@ namespace InvestLens.IntegrationTests
     public class UsuarioEndpointTests
     {
         [Theory]
-        [InlineData("user@example.com", "password", "password", "success", 204)]
-        [InlineData("invalid", "password", "password", "success", 400)]
-        [InlineData("user@example.com", "short", "short", "success", 400)]
-        [InlineData("user@example.com", "password", "different", "success", 400)]
-        [InlineData("user@example.com", "password", "", "success", 400)]
-        [InlineData("user@example.com", "password", "password", "business", 400)]
-        [InlineData("user@example.com", "password", "password", "technical", 500)]
+        [InlineData("52998224725", "user@example.com", "password", "password", "success", 204)]
+        [InlineData("52998224725", "invalid", "password", "password", "success", 400)]
+        [InlineData("123", "user@example.com", "password", "password", "success", 400)]
+        [InlineData("52998224725", "user@example.com", "short", "short", "success", 400)]
+        [InlineData("52998224725", "user@example.com", "password", "different", "success", 400)]
+        [InlineData("52998224725", "user@example.com", "password", "", "success", 400)]
+        [InlineData("52998224725", "user@example.com", "password", "password", "business", 400)]
+        [InlineData("52998224725", "user@example.com", "password", "password", "technical", 500)]
         public async Task RegistrationValidatesInputAndReturnsSafeResponses(
-            string email, string senha, string confirmacaoSenha, string outcome, int expectedStatus)
+            string cpf, string email, string senha, string confirmacaoSenha, string outcome, int expectedStatus)
         {
             var repository = new UsuarioDouble(outcome);
             await using var factory = new TestApiFactory().WithWebHostBuilder(builder =>
@@ -33,8 +34,8 @@ namespace InvestLens.IntegrationTests
                     services.AddSingleton<IUsuarioRepository>(repository);
                 }));
             using var client = factory.CreateClient();
-            using var response = await client.PostAsJsonAsync("/api/usuario",
-                new { nome = "Usuário", email, senha, confirmacaoSenha });
+            using var response = await client.PostAsJsonAsync("/api/v1/usuario",
+                new { nome = "Usuário", cpf, email, senha, confirmacaoSenha });
             Assert.Equal(expectedStatus, (int)response.StatusCode);
             var body = await response.Content.ReadAsStringAsync();
             Assert.DoesNotContain(senha, body);

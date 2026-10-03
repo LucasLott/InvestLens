@@ -11,6 +11,12 @@ namespace InvestLens.Application.Validators
                 .NotEmpty().WithMessage("O nome é obrigatório.")
                 .MaximumLength(80).WithMessage("O nome não pode exceder 80 caracteres.");
 
+            RuleFor(x => x.Cpf)
+                .Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage("O CPF é obrigatório.")
+                .Matches("^[0-9]{11}$").WithMessage("O CPF deve conter 11 dígitos.")
+                .Must(CpfValidator.IsValid).WithMessage("O CPF é inválido.");
+
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("O email é obrigatório.")
                 .EmailAddress().WithMessage("O email deve ser válido.")

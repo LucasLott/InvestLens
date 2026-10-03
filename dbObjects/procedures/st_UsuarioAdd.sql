@@ -1,4 +1,5 @@
 CREATE OR ALTER PROCEDURE dbo.st_UsuarioAdd @NM_Usuario Varchar(80)
+                                           ,@CPF        Varchar(11)
                                            ,@DS_Email   Varchar(255)
                                            ,@TX_Senha   Varchar(MAX)
                                            ,@FL_Ativo   Bit
@@ -18,6 +19,7 @@ BEGIN
           ,@ErrMsg     = '';
 
     IF (ISNULL(@NM_Usuario, '') = '') SET @ErrMsg += Char(13) + 'NM_Usuario';
+    IF (ISNULL(@CPF       , '') = '') SET @ErrMsg += Char(13) + 'CPF';
     IF (ISNULL(@DS_EMail  , '') = '') SET @ErrMsg += Char(13) + 'DS_EMail';
     IF (ISNULL(@TX_Senha  , '') = '') SET @ErrMsg += Char(13) + 'TX_Senha';
     IF (ISNULL(@FL_Ativo  , -1) = -1) SET @ErrMsg += Char(13) + 'FL_Ativo';
@@ -40,6 +42,24 @@ BEGIN
       THROW 50001, @ErrMsg, 1;
     END
 
+    IF EXISTS(SELECT 1
+              FROM dbo.ILCAD001
+              WHERE CPF = @CPF)
+    BEGIN
+      SELECT @ReturnCode = 1
+            ,@ErrMsg     = 'CPF já cadastrado!';
+
+      THROW 50001, @ErrMsg, 1;
+    END
+
+    IF (dbo.fn_ValidaCpf(@CPF) = 'N')
+    BEGIN
+      SELECT @ReturnCode = 1
+            ,@ErrMsg     = 'CPF inválido!';
+
+      THROW 50001, @ErrMsg, 1;
+    END
+
     SET @NO_Sequencia = NEXT VALUE FOR dbo.SEQ_ILCAD001_CD_Usuario;
     SET @CD_Usuario = RIGHT('000' + CAST(@NO_Sequencia AS VARCHAR(3)), 3);
 
@@ -47,6 +67,7 @@ BEGIN
 
     INSERT INTO dbo.ILCAD001 (CD_Usuario
                              ,NM_Usuario
+                             ,CPF
                              ,DS_Email
                              ,TX_Senha
                              ,FL_Ativo
@@ -54,6 +75,7 @@ BEGIN
                              ,DH_Alteracao)
     SELECT @CD_Usuario
           ,@NM_Usuario
+          ,@CPF
           ,@DS_Email
           ,@TX_Senha
           ,@FL_Ativo

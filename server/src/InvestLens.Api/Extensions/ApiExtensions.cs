@@ -96,14 +96,15 @@ namespace InvestLens.Api.Extensions
         {
             var swagger = app.Services.GetRequiredService<IOptions<SwaggerSettings>>().Value;
 
-            if (!swagger.EnableSwaggerProd) return;
-
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
+            if (swagger.EnableSwaggerProd || app.Environment.IsDevelopment())
             {
-                options.DocumentTitle = swagger.Title;
-                options.SwaggerEndpoint($"{swagger.Version}/swagger.json", $"{swagger.Title} {swagger.Version}");
-            });
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
+                {
+                    options.DocumentTitle = swagger.Title;
+                    options.SwaggerEndpoint($"{swagger.Version}/swagger.json", $"{swagger.Title} {swagger.Version}");
+                });
+            }
         }
     }
 }

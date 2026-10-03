@@ -41,6 +41,7 @@ namespace InvestLens.Infrastructure.Repositories
             var parameters = new DynamicParameters();
 
             parameters.Add("@NM_Usuario", request.Nome, DbType.AnsiString, size: 80);
+            parameters.Add("@CPF", request.Cpf, DbType.AnsiString, size: 11);
             parameters.Add("@DS_Email", request.Email, DbType.AnsiString, size: 255);
             parameters.Add("@TX_Senha", senhaHash, DbType.AnsiString, size: -1);
             parameters.Add("@FL_Ativo", true);

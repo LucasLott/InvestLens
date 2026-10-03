@@ -3,6 +3,11 @@ import { env } from '../config/env'
 import { authSession } from '../auth/authSession'
 
 declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuth?: boolean
+    skipAuthRefresh?: boolean
+  }
+
   export interface InternalAxiosRequestConfig {
     skipAuth?: boolean
     skipAuthRefresh?: boolean

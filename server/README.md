@@ -15,11 +15,43 @@ Os testes usam xUnit, Microsoft.NET.Test.Sdk e Microsoft.AspNetCore.Mvc.Testing.
 
 ## Execução local
 
+Pré-requisitos: .NET SDK 10 e, para usar os endpoints que acessam dados, uma instância do SQL Server com o banco configurado.
+
+### Configurações locais
+
+Antes de iniciar a API, configure os segredos do projeto `InvestLens.Api`. Eles não devem ser adicionados ao `appsettings.json` nem enviados ao repositório.
+
+No PowerShell, a partir da raiz do repositório, execute:
+
+```powershell
+# Gera uma chave aleatória de 32 bytes, codificada em Base64, exigida para assinar os JWTs.
+$jwtSecret = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+
+dotnet user-secrets set "Authentication:Jwt:Secret" $jwtSecret --project server/src/InvestLens.Api
+dotnet user-secrets set "ConnectionStrings:InvestLens" "Server=SEU_SERVIDOR;Database=InvestLens;Trusted_Connection=True;TrustServerCertificate=True" --project server/src/InvestLens.Api
+```
+
+Substitua a string de conexão pelo acesso ao seu SQL Server. Para autenticação SQL, use uma string equivalente a `Server=SEU_SERVIDOR;Database=InvestLens;User Id=USUARIO;Password=SENHA;TrustServerCertificate=True`. A chave `Authentication:Jwt:Secret` é obrigatória já no startup e deve ser Base64 de exatamente 32 bytes. A conexão é solicitada apenas ao executar operações que acessam o banco; `/health` não a consulta.
+
+Crie o esquema do banco executando os scripts em `dbObjects/` na seguinte ordem:
+
+1. `tables/001_CreateTables.sql`
+2. `functions/fn_ValidaCpf.sql`, `functions/fn_DadosLogin.sql` e `functions/fn_DadosConfiguracao.sql`
+3. `procedures/st_UsuarioAdd.sql`, `procedures/st_ConfiguracaoAdd.sql`, `procedures/st_ConfiguracaoUpd.sql` e `procedures/st_RefreshToken.sql`
+
+Para conferir os segredos cadastrados, use `dotnet user-secrets list --project server/src/InvestLens.Api`. O comando exibe os valores no terminal; não compartilhe essa saída.
+
 ```powershell
 dotnet restore server/InvestLens.sln
 dotnet build server/InvestLens.sln --no-restore
 dotnet test server/InvestLens.sln --no-build
 dotnet run --project server/src/InvestLens.Api --launch-profile http
+```
+
+Para executar a compilação Release no ambiente `Production`, use o perfil correspondente:
+
+```powershell
+dotnet run --project server/src/InvestLens.Api -c Release --launch-profile http-production
 ```
 
 - Disponibilidade: `http://localhost:5124/health` (somente processo, sem consultar banco).
@@ -28,7 +60,7 @@ dotnet run --project server/src/InvestLens.Api --launch-profile http
 
 Swagger utiliza `SwaggerSettings` vinculada à seção `Swagger` pelo Options Pattern. `Title`, `Version` e `Description` configuram o documento e a rota usa a versão configurada. Em DEBUG, Swagger está sempre habilitado; em RELEASE, somente com `EnableSwaggerProd=true` (padrão atual: false), independentemente do ambiente de execução. Quando desabilitado, a UI e o documento não são expostos. A geração inclui os futuros Controllers. Neste estágio o documento não contém endpoints de negócio.
 
-Somente `appsettings.json` contém configurações versionáveis e não sensíveis. O projeto Api possui UserSecretsId. O desenvolvedor poderá cadastrar `ConnectionStrings:InvestLens` por .NET User Secrets no desenvolvimento. Nenhum valor é fornecido ou necessário no startup. A factory retorna uma conexão fechada, com configuração lida sob demanda; o futuro repository deve abrir e descartar a conexão, propagando CancellationToken nas operações assíncronas.
+Somente `appsettings.json` contém configurações versionáveis e não sensíveis. O projeto Api possui UserSecretsId e as configurações locais necessárias estão descritas acima. A factory retorna uma conexão fechada, com configuração lida sob demanda; o repository abre e descarta a conexão nas operações assíncronas.
 
 ## Erros e logs
 

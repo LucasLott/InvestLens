@@ -34,6 +34,11 @@ namespace InvestLens.UnitTests
         [Theory]
         [InlineData("name")]
         [InlineData("long-name")]
+        [InlineData("cpf")]
+        [InlineData("invalid-cpf")]
+        [InlineData("non-numeric-cpf")]
+        [InlineData("invalid-cpf-digits")]
+        [InlineData("repeated-cpf")]
         [InlineData("email")]
         [InlineData("long-email")]
         [InlineData("password")]
@@ -46,6 +51,11 @@ namespace InvestLens.UnitTests
             {
                 case "name": request.Nome = " "; break;
                 case "long-name": request.Nome = new string('a', 81); break;
+                case "cpf": request.Cpf = ""; break;
+                case "invalid-cpf": request.Cpf = "123"; break;
+                case "non-numeric-cpf": request.Cpf = "5299822472a"; break;
+                case "invalid-cpf-digits": request.Cpf = "52998224724"; break;
+                case "repeated-cpf": request.Cpf = "11111111111"; break;
                 case "email": request.Email = "invalid"; break;
                 case "long-email": request.Email = new string('a', 244) + "@example.com"; break;
                 case "password": request.Senha = request.ConfirmacaoSenha = "12345"; break;
@@ -84,9 +94,20 @@ namespace InvestLens.UnitTests
             Assert.True(new AdicionarUsuarioRequestValidator().Validate(request).IsValid);
         }
 
+        [Theory]
+        [InlineData("52998224725")]
+        [InlineData("01234567890")]
+        public void ValidCpfIsAccepted(string cpf)
+        {
+            var request = Request();
+            request.Cpf = cpf;
+
+            Assert.True(new AdicionarUsuarioRequestValidator().Validate(request).IsValid);
+        }
+
         private static AdicionarUsuarioRequest Request() => new()
         {
-            Nome = "Usuário", Email = "user@example.com",
+            Nome = "Usuário", Cpf = "52998224725", Email = "user@example.com",
             Senha = "password", ConfirmacaoSenha = "password"
         };
 

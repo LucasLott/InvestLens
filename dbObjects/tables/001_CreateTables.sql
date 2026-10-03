@@ -298,6 +298,7 @@ BEGIN
     ID_Usuario INT IDENTITY(1,1) NOT NULL
    ,CD_Usuario CHAR(3) NOT NULL
    ,NM_Usuario VARCHAR(80) NOT NULL
+   ,CPF        VARCHAR(11) NOT NULL
    ,DS_Email VARCHAR(255) NOT NULL
    ,TX_Senha VARCHAR(MAX) NOT NULL -- Exclusivamente hash; nunca senha em texto puro.
    ,FL_Ativo BIT NOT NULL
@@ -422,6 +423,53 @@ BEGIN
 
   ALTER TABLE dbo.ILCAD001
   ADD CONSTRAINT UK_ILCAD001_CD_Usuario UNIQUE (CD_Usuario);
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD001', 'U') IS NOT NULL
+  AND COL_LENGTH('dbo.ILCAD001', 'CPF') IS NOT NULL
+  AND NOT EXISTS
+(
+  SELECT 1
+  FROM sys.key_constraints
+  WHERE parent_object_id = OBJECT_ID('dbo.ILCAD001')
+    AND name = 'UK_ILCAD001_CPF'
+)
+  AND NOT EXISTS
+(
+  -- Uma UNIQUE equivalente já fornece a restrição e o índice necessários.
+  SELECT 1
+  FROM sys.key_constraints Chave
+       INNER JOIN sys.index_columns Coluna
+       ON Coluna.object_id = Chave.parent_object_id
+         AND Coluna.index_id = Chave.unique_index_id
+  WHERE Chave.parent_object_id = OBJECT_ID('dbo.ILCAD001')
+    AND Chave.type = 'UQ'
+    AND Coluna.column_id = COLUMNPROPERTY(OBJECT_ID('dbo.ILCAD001'), 'CPF', 'ColumnId')
+    AND Coluna.key_ordinal = 1
+    AND NOT EXISTS
+    (
+      SELECT 1
+      FROM sys.index_columns OutraColuna
+      WHERE OutraColuna.object_id = Coluna.object_id
+        AND OutraColuna.index_id = Coluna.index_id
+        AND OutraColuna.key_ordinal > 1
+    )
+)
+BEGIN
+  IF EXISTS
+  (
+    SELECT CPF
+    FROM dbo.ILCAD001
+    GROUP BY CPF
+    HAVING COUNT_BIG(*) > 1
+  )
+  BEGIN
+    THROW 51008, 'Valores duplicados em ILCAD001.CPF; UNIQUE não criada.', 1;
+  END;
+
+  ALTER TABLE dbo.ILCAD001
+  ADD CONSTRAINT UK_ILCAD001_CPF UNIQUE (CPF);
 END;
 GO
 
