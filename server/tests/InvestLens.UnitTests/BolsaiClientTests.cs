@@ -15,7 +15,7 @@ public sealed class BolsaiClientTests
     [Fact]
     public async Task VerifyConnectivityAsync_SendsAuthenticatedGetToDocumentedEndpoint()
     {
-        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK));
+        var handler = new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
         var client = CreateClient(handler);
 
         await client.VerifyConnectivityAsync(CancellationToken.None);

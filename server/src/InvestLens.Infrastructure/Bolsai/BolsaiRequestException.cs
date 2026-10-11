@@ -10,7 +10,8 @@ namespace InvestLens.Infrastructure.Bolsai
         RateLimited,
         ExternalServiceFailure,
         Timeout,
-        NetworkUnavailable
+        NetworkUnavailable,
+        InvalidResponse
     }
 
     public sealed class BolsaiRequestException(BolsaiFailureKind kind, string message, HttpStatusCode? statusCode = null, Exception? innerException = null)

@@ -58,6 +58,7 @@ nunit-*.xml
 
 # Markdown documentation
 /docs/**/*.[mM][dD]
+!/docs/bolsai-integration.md
 
 # .NET local artifacts
 *.log

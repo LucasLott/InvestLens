@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using InvestLens.Infrastructure.Bolsai;
+using InvestLens.Application.Interfaces.Providers;
 
 namespace InvestLens.Infrastructure.DependencyInjection
 {
@@ -36,6 +37,7 @@ namespace InvestLens.Infrastructure.DependencyInjection
                 client.BaseAddress = new Uri(settings.BaseUrl, UriKind.Absolute);
                 client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
             });
+            services.AddScoped<ICompanyMarketDataProvider>(provider => provider.GetRequiredService<BolsaiClient>());
             
             return services;
         }

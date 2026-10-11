@@ -13,6 +13,10 @@ public sealed class BolsaiConnectivityTests(TestApiFactory factory) : IClassFixt
             return;
 
         var client = factory.Services.GetRequiredService<BolsaiClient>();
-        await client.VerifyConnectivityAsync(CancellationToken.None);
+        foreach (var ticker in new[] { "PETR4", "VALE3", "ITUB4" })
+        {
+            var snapshot = await client.GetCompanySnapshotAsync(ticker, CancellationToken.None);
+            Assert.Equal(ticker, snapshot.QueriedTicker);
+        }
     }
 }
