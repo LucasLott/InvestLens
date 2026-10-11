@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { AuthenticatedHomePage } from '../pages/AuthenticatedHomePage'
 import { ConfigurationPage } from '../pages/ConfigurationPage'
@@ -12,8 +12,9 @@ export function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<CadastroPage />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-        <Route path="/" element={<AuthenticatedHomePage />} />
+        <Route path="/inicio" element={<AuthenticatedHomePage />} />
         <Route path="/configuracao" element={<ConfigurationPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />

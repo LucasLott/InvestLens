@@ -59,9 +59,5 @@ export function AuthProvider({ children }: PropsWithChildren) {
     logout,
   }), [isInitializing, login, logout, user])
 
-  return <AuthContext value={value}>{isInitializing ? <AuthInitializing /> : children}</AuthContext>
-}
-
-function AuthInitializing() {
-  return <main className="auth-initializing" aria-busy="true" aria-live="polite"><p className="eyebrow">InvestLens</p><h1>Preparando sua experi\u00eancia.</h1><p>Verificando sua sess\u00e3o com seguran\u00e7a.</p></main>
+  return <AuthContext value={value}>{children}</AuthContext>
 }

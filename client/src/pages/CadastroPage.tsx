@@ -33,7 +33,7 @@ export function CadastroPage() {
     return () => window.clearTimeout(timeout)
   }, [navigate, success])
 
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) return <Navigate to="/inicio" replace />
 
   const update = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setValues((current) => ({ ...current, [key]: value }))

@@ -10,15 +10,20 @@ namespace InvestLens.IntegrationTests
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Testing");
-            builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["Authentication:Jwt:Secret"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
-                    ["Authentication:Jwt:Issuer"] = "InvestLens.Tests",
-                    ["Authentication:Jwt:Audience"] = "InvestLens.Tests.Client",
-                    ["Authentication:Jwt:ExpirationInMinutes"] = "17"
-                }));
+            var runBolsaiConnectivity = string.Equals(Environment.GetEnvironmentVariable("BOLSAI_RUN_CONNECTIVITY_TESTS"), "true", StringComparison.OrdinalIgnoreCase);
+            builder.UseEnvironment(runBolsaiConnectivity ? "Development" : "Testing");
+            var settings = new Dictionary<string, string?>
+            {
+                ["Authentication:Jwt:Secret"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
+                ["Authentication:Jwt:Issuer"] = "InvestLens.Tests",
+                ["Authentication:Jwt:Audience"] = "InvestLens.Tests.Client",
+                ["Authentication:Jwt:ExpirationInMinutes"] = "17"
+            };
+
+            if (!runBolsaiConnectivity)
+                settings["Bolsai:ApiKey"] = "test-only-bolsai-key";
+
+            builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(settings));
         }
     }
 }

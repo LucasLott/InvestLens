@@ -8,12 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using InvestLens.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
+using InvestLens.Infrastructure.Bolsai;
 
 namespace InvestLens.Infrastructure.DependencyInjection
 {
     public static class DependencyInjectionExtensions
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -24,6 +26,16 @@ namespace InvestLens.Infrastructure.DependencyInjection
             services.AddSingleton<SymmetricSecurityKey>(provider => provider.GetRequiredService<IOptions<JwtSettings>>().Value.CreateSigningKey());
             services.AddSingleton(TimeProvider.System);
             services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.AddOptions<BolsaiSettings>()
+                .Bind(configuration.GetSection(BolsaiSettings.SectionName))
+                .ValidateOnStart();
+            services.AddSingleton<IValidateOptions<BolsaiSettings>, BolsaiSettingsValidator>();
+            services.AddHttpClient<BolsaiClient>((provider, client) =>
+            {
+                var settings = provider.GetRequiredService<IOptions<BolsaiSettings>>().Value;
+                client.BaseAddress = new Uri(settings.BaseUrl, UriKind.Absolute);
+                client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+            });
             
             return services;
         }

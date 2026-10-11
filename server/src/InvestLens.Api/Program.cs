@@ -10,7 +10,7 @@ namespace InvestLens.Api
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.AddApiLogging();
-            builder.Services.AddApplication().AddInfrastructure().AddApiServices(builder.Configuration);
+            builder.Services.AddApplication().AddInfrastructure(builder.Configuration).AddApiServices(builder.Configuration);
             builder.Services.AddJwtAuthentication(builder.Configuration);
             var app = builder.Build();
             app.UseApiErrors();
