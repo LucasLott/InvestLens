@@ -28,13 +28,12 @@ const initialValues: FormValues = {
 };
 
 export function CadastroPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [values, setValues] = useState<FormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [planoSelecionado, setPlanoSelecionado] = useState<Plano | null>(null);
@@ -56,12 +55,6 @@ export function CadastroPage() {
       .catch(() => setPlanoSelecionado(null));
   }, [intencaoDePlano]);
 
-  useEffect(() => {
-    if (!success) return;
-    const timeout = window.setTimeout(() => navigate('/login', { replace: true }), 1400);
-    return () => window.clearTimeout(timeout);
-  }, [navigate, success]);
-
   if (isAuthenticated) return <Navigate to="/inicio" replace />;
 
   const update = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
@@ -77,14 +70,14 @@ export function CadastroPage() {
     setValues((current) => ({ ...current, cpf: request.cpf }));
     setErrors(nextErrors);
     setError(null);
-    setSuccess(false);
     if (Object.keys(nextErrors).length) return;
 
     setIsSubmitting(true);
     try {
       await usuarioService.cadastrar(request);
       setValues(initialValues);
-      setSuccess(true);
+      await login({ email: request.email, senha: request.senha });
+      navigate('/inicio', { replace: true });
     } catch (exception: unknown) {
       setError(messageFor(exception));
     } finally {
@@ -239,11 +232,6 @@ export function CadastroPage() {
               )}
             </div>
             {error && <Alert>{error}</Alert>}
-            {success && (
-              <p className="cadastro-success" role="status">
-                Cadastro realizado com sucesso. Redirecionando para o login…
-              </p>
-            )}
             <Button type="submit" loading={isSubmitting} className="cadastro-submit">
               {isSubmitting ? 'Criando conta…' : 'Criar conta'}
             </Button>
