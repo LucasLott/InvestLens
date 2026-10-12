@@ -35,3 +35,11 @@ A documentação informa plano gratuito com 200 requisições/dia, fundamentos e
 ## Pendências
 
 Confirmar por respostas reais, para a chave em uso, a disponibilidade de dividendos/JCP e as unidades observadas nos três ativos. A Etapa 3 deverá decidir persistência, política de atualização e regras de filtro; nada disso foi implementado aqui.
+
+## Importação manual
+
+A Etapa 4 reutiliza o cliente configurado para uma importação interna manual. A
+credencial padrão permanece na seção segura `Bolsai`; `BolsaiPro` é reservada para
+uma futura seleção de recursos autorizados por assinatura válida, não pelo plano
+declarado pelo cliente. Não há seleção de credencial via request, endpoint público
+ou execução automática.

@@ -1,6 +1,8 @@
 using InvestLens.Api.Extensions;
 using InvestLens.Application;
 using InvestLens.Infrastructure.DependencyInjection;
+using InvestLens.Api.Configuration;
+using InvestLens.Api.Services;
 
 namespace InvestLens.Api
 {
@@ -11,6 +13,9 @@ namespace InvestLens.Api
             var builder = WebApplication.CreateBuilder(args);
             builder.AddApiLogging();
             builder.Services.AddApplication().AddInfrastructure(builder.Configuration).AddApiServices(builder.Configuration);
+            builder.Services.AddOptions<FinancialUpdateSettings>().Bind(builder.Configuration.GetSection(FinancialUpdateSettings.SectionName)).ValidateOnStart();
+            builder.Services.AddSingleton<Microsoft.Extensions.Options.IValidateOptions<FinancialUpdateSettings>, FinancialUpdateSettingsValidator>();
+            builder.Services.AddHostedService<FinancialUpdateWorker>();
             builder.Services.AddJwtAuthentication(builder.Configuration);
             var app = builder.Build();
             app.UseApiErrors();

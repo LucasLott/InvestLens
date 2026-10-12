@@ -2,6 +2,7 @@ using FluentValidation;
 using InvestLens.Application.Interfaces.Services.Auth;
 using InvestLens.Application.Interfaces.Services.Usuario;
 using InvestLens.Application.Interfaces.Services.Configuracao;
+using InvestLens.Application.Interfaces.Services;
 using InvestLens.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,8 @@ namespace InvestLens.Application
             services.AddScoped<IConfiguracaoService, ConfiguracaoService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<RefreshTokenService>();
+            services.AddScoped<IFinancialImportService, FinancialImportService>();
+            services.AddScoped<IFinancialUpdateService, FinancialUpdateService>();
 
             return services;
         }

@@ -89,7 +89,6 @@ correspondente está em `002_DropTables.sql`, na ordem de dependências. Execute
 ambiente de desenvolvimento autorizado. Não há conexão de banco configurada neste
 trabalho, portanto a execução contra SQL Server permanece pendente.
 
-Etapa 4: validar respostas reais e termos de armazenamento; decidir resolução de
-identidade corporativa e política para dados sem data de referência; implementar
-as procedures/repositórios de persistência. Nenhuma dessas implementações faz
-parte desta etapa.
+Na Etapa 4, `CD_TickerPrimario` passou a preservar o `ticker_primary` da fonte e
+serve para reunir ativos da mesma empresa sem deduplicação por nomes. A persistência
+manual e sua política de atualização estão em [financial-import.md](financial-import.md).

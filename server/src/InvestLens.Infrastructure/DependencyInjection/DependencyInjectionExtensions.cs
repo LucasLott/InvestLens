@@ -22,6 +22,8 @@ namespace InvestLens.Infrastructure.DependencyInjection
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IConfiguracaoRepository, ConfiguracaoRepository>();
             services.AddScoped<InvestLens.Application.Interfaces.Repositories.IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<InvestLens.Application.Interfaces.Repositories.IFinancialImportRepository, FinancialImportRepository>();
+            services.AddScoped<InvestLens.Application.Interfaces.Repositories.IFinancialUpdateRepository, FinancialUpdateRepository>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidator>();
             services.AddSingleton<SymmetricSecurityKey>(provider => provider.GetRequiredService<IOptions<JwtSettings>>().Value.CreateSigningKey());

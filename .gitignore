@@ -60,6 +60,8 @@ nunit-*.xml
 /docs/**/*.[mM][dD]
 !/docs/financial-database.md
 !/docs/plans.md
+!/docs/financial-import.md
+!/docs/financial-update.md
 !/docs/bolsai-integration.md
 
 # .NET local artifacts
