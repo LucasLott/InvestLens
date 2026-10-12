@@ -40,6 +40,7 @@ namespace InvestLens.Infrastructure.DependencyInjection
                 client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
             });
             services.AddScoped<ICompanyMarketDataProvider>(provider => provider.GetRequiredService<BolsaiClient>());
+            services.AddScoped<IApiRequestBudget, BolsaiRequestBudget>();
             
             return services;
         }

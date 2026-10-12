@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace InvestLens.Infrastructure.Bolsai;
 
-public sealed partial class BolsaiClient(HttpClient httpClient, IOptions<BolsaiSettings> settings, ILogger<BolsaiClient> logger) : ICompanyMarketDataProvider
+public sealed partial class BolsaiClient(HttpClient httpClient, IOptions<BolsaiSettings> settings, ILogger<BolsaiClient> logger, IApiRequestBudget? budget = null) : ICompanyMarketDataProvider
 {
     private readonly HttpClient _httpClient = httpClient; private readonly BolsaiSettings _settings = settings.Value; private readonly ILogger<BolsaiClient> _logger = logger;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
@@ -27,7 +27,7 @@ public sealed partial class BolsaiClient(HttpClient httpClient, IOptions<BolsaiS
     }
     private async Task<T> GetAsync<T>(string path, CancellationToken ct)
     {
-        using var request=new HttpRequestMessage(HttpMethod.Get,path); request.Headers.TryAddWithoutValidation("X-API-Key",_settings.ApiKey);
+        if (budget is not null) await budget.ReserveAsync(ct); using var request=new HttpRequestMessage(HttpMethod.Get,path); request.Headers.TryAddWithoutValidation("X-API-Key",_settings.ApiKey);
         try { using var response=await _httpClient.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,ct); if(!response.IsSuccessStatusCode) throw HttpError(response.StatusCode); return await response.Content.ReadFromJsonAsync<T>(JsonOptions,ct) ?? throw Error(BolsaiFailureKind.InvalidResponse,"A bolsai retornou um corpo vazio ou inválido.",null,null); }
         catch(JsonException e){throw Error(BolsaiFailureKind.InvalidResponse,"A bolsai retornou JSON inválido.",null,e);} catch(OperationCanceledException) when(ct.IsCancellationRequested){throw;} catch(OperationCanceledException e){throw Error(BolsaiFailureKind.Timeout,"A chamada à bolsai excedeu o tempo limite configurado.",null,e);} catch(HttpRequestException e){throw Error(BolsaiFailureKind.NetworkUnavailable,"Não foi possível estabelecer comunicação com a bolsai.",null,e);}
     }

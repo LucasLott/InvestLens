@@ -68,6 +68,8 @@ nunit-*.xml
 !/docs/plans.md
 !/docs/financial-import.md
 !/docs/financial-update.md
+!/docs/fundamental-analysis.md
+!/docs/financial-access.md
 !/docs/bolsai-integration.md
 
 # .NET local artifacts

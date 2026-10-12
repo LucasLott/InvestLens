@@ -1301,6 +1301,28 @@ BEGIN
 END;
 GO
 
+-- Consumo diário compartilhado da credencial bolsai; a janela é definida pela aplicação.
+IF OBJECT_ID('dbo.ILLOG001', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILLOG001
+  (
+    ID_ConsumoApi INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILLOG001 PRIMARY KEY
+   ,NM_Fonte VARCHAR(80) NOT NULL
+   ,DT_Janela DATE NOT NULL
+   ,QT_Requisicao INT NOT NULL
+   ,DH_Alteracao DATETIME2(0) NOT NULL CONSTRAINT DF_ILLOG001_DH_Alteracao DEFAULT (SYSDATETIME())
+   ,CONSTRAINT UK_ILLOG001_Fonte_Janela UNIQUE (NM_Fonte, DT_Janela)
+   ,CONSTRAINT CK_ILLOG001_QT_Requisicao CHECK (QT_Requisicao >= 0)
+  );
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILLOG001', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILLOG001')
+  INSERT dbo.ILCAD000(NM_Fisico,NM_Logico) VALUES ('ILLOG001','Consumo Diário de API');
+GO
+
 -- Refresh sessions: UTC timestamps, absolute lifetime, hashes only.
 IF OBJECT_ID('dbo.ILAUT001', 'U') IS NULL
 BEGIN
