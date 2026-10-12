@@ -28,7 +28,7 @@ namespace InvestLens.Application.Services
                 throw new CredenciaisInvalidasException();
 
             cancellationToken.ThrowIfCancellationRequested();
-            var token = _jwtTokenGenerator.Generate(usuario.IdUsuario, usuario.Codigo, usuario.Nome);
+            var token = _jwtTokenGenerator.Generate(usuario.IdUsuario, usuario.Codigo, usuario.Nome, usuario.IdPlano);
 
             return new LoginResponse
             {

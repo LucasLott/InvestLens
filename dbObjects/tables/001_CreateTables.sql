@@ -1030,6 +1030,259 @@ BEGIN
 END;
 GO
 
+-- Financeiro: cadastros independentes de empresa e ativo, seguidos por
+-- snapshots históricos. A fonte é textual para preservar rastreabilidade sem
+-- antecipar um cadastro genérico de provedores.
+IF OBJECT_ID('dbo.ILFIN001', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILFIN001
+  (
+    ID_Empresa INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILFIN001 PRIMARY KEY
+   ,NM_Empresa VARCHAR(80) NULL
+   ,NM_RazaoSocial VARCHAR(255) NULL
+   ,DS_Setor VARCHAR(255) NULL
+   ,NM_Fonte VARCHAR(80) NOT NULL
+   ,DH_Inclusao DATETIME2(0) NOT NULL CONSTRAINT DF_ILFIN001_DH_Inclusao DEFAULT (SYSDATETIME())
+   ,DH_Alteracao DATETIME2(0) NULL
+  );
+END;
+GO
+
+IF OBJECT_ID('dbo.ILFIN002', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILFIN002
+  (
+    ID_Ativo INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILFIN002 PRIMARY KEY
+   ,ID_Empresa INT NOT NULL CONSTRAINT FK_ILFIN002_ILFIN001 REFERENCES dbo.ILFIN001(ID_Empresa)
+   ,CD_Ticker VARCHAR(20) COLLATE Latin1_General_100_BIN2 NOT NULL
+   ,NM_Fonte VARCHAR(80) NOT NULL
+   ,DH_Inclusao DATETIME2(0) NOT NULL CONSTRAINT DF_ILFIN002_DH_Inclusao DEFAULT (SYSDATETIME())
+   ,DH_Alteracao DATETIME2(0) NULL
+   ,CONSTRAINT UK_ILFIN002_CD_Ticker UNIQUE (CD_Ticker)
+   ,CONSTRAINT CK_ILFIN002_CD_Ticker_Normalizado CHECK
+    (CD_Ticker = UPPER(LTRIM(RTRIM(CD_Ticker)))
+     AND LEN(CD_Ticker) > 0
+     AND DATALENGTH(CD_Ticker) = LEN(CD_Ticker))
+  );
+
+  CREATE INDEX IX_ILFIN002_ID_Empresa
+  ON dbo.ILFIN002 (ID_Empresa);
+END;
+GO
+
+-- Indicadores contábeis são da empresa. Percentuais seguem a representação
+-- humana do InvestLens; dívida/patrimônio permanece um múltiplo.
+IF OBJECT_ID('dbo.ILFIN003', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILFIN003
+  (
+    ID_IndicadorEmpresa INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILFIN003 PRIMARY KEY
+   ,ID_Empresa INT NOT NULL CONSTRAINT FK_ILFIN003_ILFIN001 REFERENCES dbo.ILFIN001(ID_Empresa)
+   ,NM_Fonte VARCHAR(80) NOT NULL
+   ,DT_Referencia DATE NULL
+   ,DH_Coleta DATETIME2(0) NOT NULL
+   ,PE_ROE DECIMAL(18,8) NULL
+   ,VL_DividaPatrimonio DECIMAL(18,8) NULL
+   ,PE_MargemLiquida DECIMAL(18,8) NULL
+   ,CONSTRAINT CK_ILFIN003_Indicador CHECK
+    (PE_ROE IS NOT NULL OR VL_DividaPatrimonio IS NOT NULL OR PE_MargemLiquida IS NOT NULL)
+  );
+
+  CREATE UNIQUE INDEX UX_ILFIN003_Empresa_Fonte_Referencia
+  ON dbo.ILFIN003 (ID_Empresa, NM_Fonte, DT_Referencia)
+  WHERE DT_Referencia IS NOT NULL;
+END;
+GO
+
+-- P/L e Dividend Yield dependem da negociação do ativo e, portanto, não são
+-- compartilhados entre os ativos de uma mesma empresa.
+IF OBJECT_ID('dbo.ILFIN004', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILFIN004
+  (
+    ID_IndicadorAtivo INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILFIN004 PRIMARY KEY
+   ,ID_Ativo INT NOT NULL CONSTRAINT FK_ILFIN004_ILFIN002 REFERENCES dbo.ILFIN002(ID_Ativo)
+   ,NM_Fonte VARCHAR(80) NOT NULL
+   ,DT_Referencia DATE NULL
+   ,DH_Coleta DATETIME2(0) NOT NULL
+   ,VL_PL DECIMAL(18,8) NULL
+   ,PE_DividendYield DECIMAL(18,8) NULL
+   ,CONSTRAINT CK_ILFIN004_Indicador CHECK
+    (VL_PL IS NOT NULL OR PE_DividendYield IS NOT NULL)
+  );
+
+  CREATE UNIQUE INDEX UX_ILFIN004_Ativo_Fonte_Referencia
+  ON dbo.ILFIN004 (ID_Ativo, NM_Fonte, DT_Referencia)
+  WHERE DT_Referencia IS NOT NULL;
+END;
+GO
+
+-- Cada linha é uma cotação efetivamente datada pela fonte. Não há coluna de
+-- "cotação atual": a consulta atual é obtida pela maior data de referência.
+IF OBJECT_ID('dbo.ILFIN005', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILFIN005
+  (
+    ID_Cotacao INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILFIN005 PRIMARY KEY
+   ,ID_Ativo INT NOT NULL CONSTRAINT FK_ILFIN005_ILFIN002 REFERENCES dbo.ILFIN002(ID_Ativo)
+   ,NM_Fonte VARCHAR(80) NOT NULL
+   ,DT_Referencia DATE NULL
+   ,DH_Coleta DATETIME2(0) NOT NULL
+   ,VL_PrecoFechamento DECIMAL(18,8) NOT NULL
+  );
+
+  CREATE UNIQUE INDEX UX_ILFIN005_Ativo_Fonte_Referencia
+  ON dbo.ILFIN005 (ID_Ativo, NM_Fonte, DT_Referencia)
+  WHERE DT_Referencia IS NOT NULL;
+END;
+GO
+
+-- O registro do catálogo acompanha cada tabela financeira e pode ser
+-- executado repetidamente sem duplicar metadados.
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILFIN001', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILFIN001')
+  INSERT dbo.ILCAD000(NM_Fisico, NM_Logico) VALUES ('ILFIN001', 'Cadastro de Empresas Emissoras');
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILFIN002', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILFIN002')
+  INSERT dbo.ILCAD000(NM_Fisico, NM_Logico) VALUES ('ILFIN002', 'Cadastro de Ativos Negociados');
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILFIN003', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILFIN003')
+  INSERT dbo.ILCAD000(NM_Fisico, NM_Logico) VALUES ('ILFIN003', 'Indicadores Fundamentalistas da Empresa');
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILFIN004', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILFIN004')
+  INSERT dbo.ILCAD000(NM_Fisico, NM_Logico) VALUES ('ILFIN004', 'Indicadores Fundamentalistas do Ativo');
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILFIN005', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILFIN005')
+  INSERT dbo.ILCAD000(NM_Fisico, NM_Logico) VALUES ('ILFIN005', 'Cotações de Fechamento');
+GO
+
+-- Planos de acesso. O nome é a identificação estável usada pela migração e
+-- pelos cadastros iniciais; IDs IDENTITY não são assumidos pela aplicação.
+IF OBJECT_ID('dbo.ILCAD002', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILCAD002
+  (
+    ID_Plano INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILCAD002 PRIMARY KEY
+   ,NM_Plano VARCHAR(80) NOT NULL
+   ,VL_Plano DECIMAL(18,2) NOT NULL
+   ,FL_Ativo BIT NOT NULL
+   ,DH_Inclusao DATETIME2(0) NOT NULL CONSTRAINT DF_ILCAD002_DH_Inclusao DEFAULT (SYSDATETIME())
+   ,DH_Alteracao DATETIME2(0) NULL
+   ,CONSTRAINT UK_ILCAD002_NM_Plano UNIQUE (NM_Plano)
+   ,CONSTRAINT CK_ILCAD002_VL_Plano CHECK (VL_Plano >= 0)
+  );
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD002 WHERE NM_Plano = 'Free')
+BEGIN
+  INSERT dbo.ILCAD002 (NM_Plano, VL_Plano, FL_Ativo)
+  VALUES ('Free', 0.00, 1);
+END;
+
+IF OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD002 WHERE NM_Plano = 'Pro')
+BEGIN
+  INSERT dbo.ILCAD002 (NM_Plano, VL_Plano, FL_Ativo)
+  VALUES ('Pro', 49.90, 1);
+END;
+GO
+
+-- Em bancos existentes a associação é preenchida antes de se tornar obrigatória.
+IF OBJECT_ID('dbo.ILCAD001', 'U') IS NOT NULL
+  AND COL_LENGTH('dbo.ILCAD001', 'ID_Plano') IS NULL
+BEGIN
+  ALTER TABLE dbo.ILCAD001
+  ADD ID_Plano INT NULL;
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD001', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND COL_LENGTH('dbo.ILCAD001', 'ID_Plano') IS NOT NULL
+BEGIN
+  DECLARE @ID_PlanoFree INT;
+
+  SELECT @ID_PlanoFree = ID_Plano
+  FROM dbo.ILCAD002
+  WHERE NM_Plano = 'Free';
+
+  IF @ID_PlanoFree IS NULL
+  BEGIN
+    THROW 51030, 'Plano Free não encontrado; não é possível migrar usuários.', 1;
+  END;
+
+  UPDATE dbo.ILCAD001
+  SET ID_Plano = @ID_PlanoFree
+  WHERE ID_Plano IS NULL;
+
+  IF EXISTS (SELECT 1 FROM dbo.ILCAD001 WHERE ID_Plano IS NULL)
+  BEGIN
+    THROW 51031, 'Existem usuários sem plano; NOT NULL não aplicado.', 1;
+  END;
+
+  IF EXISTS
+  (
+    SELECT 1
+    FROM sys.columns
+    WHERE object_id = OBJECT_ID('dbo.ILCAD001')
+      AND name = 'ID_Plano'
+      AND is_nullable = 1
+  )
+  BEGIN
+    ALTER TABLE dbo.ILCAD001
+    ALTER COLUMN ID_Plano INT NOT NULL;
+  END;
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD001', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND NOT EXISTS
+(
+  SELECT 1
+  FROM sys.foreign_keys
+  WHERE parent_object_id = OBJECT_ID('dbo.ILCAD001')
+    AND name = 'FK_ILCAD001_ILCAD002'
+)
+BEGIN
+  IF EXISTS
+  (
+    SELECT 1
+    FROM dbo.ILCAD001 Usuario
+         LEFT JOIN dbo.ILCAD002 Plano
+         ON Plano.ID_Plano = Usuario.ID_Plano
+    WHERE Plano.ID_Plano IS NULL
+  )
+  BEGIN
+    THROW 51032, 'ILCAD001 contém plano inexistente; FK não criada.', 1;
+  END;
+
+  ALTER TABLE dbo.ILCAD001 WITH CHECK
+  ADD CONSTRAINT FK_ILCAD001_ILCAD002
+    FOREIGN KEY (ID_Plano) REFERENCES dbo.ILCAD002 (ID_Plano);
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILCAD002')
+BEGIN
+  INSERT dbo.ILCAD000 (NM_Fisico, NM_Logico)
+  VALUES ('ILCAD002', 'Plano');
+END;
+GO
+
 -- Refresh sessions: UTC timestamps, absolute lifetime, hashes only.
 IF OBJECT_ID('dbo.ILAUT001', 'U') IS NULL
 BEGIN

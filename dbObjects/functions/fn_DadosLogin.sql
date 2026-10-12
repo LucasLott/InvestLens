@@ -7,5 +7,6 @@ RETURN (SELECT ID_Usuario
               ,DS_Email
               ,TX_Senha
               ,FL_Ativo
-        FROM dbo.ILCAD001
+              ,Usuario.ID_Plano
+        FROM dbo.ILCAD001 Usuario
         WHERE DS_Email = @DS_Email)

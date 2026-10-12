@@ -30,7 +30,7 @@ namespace InvestLens.UnitTests
             Assert.Equal("user@example.com", repository.Email);
             Assert.Equal(cancellation.Token, repository.Token);
             Assert.Equal(("x", "stored-hash"), hasher.Verified);
-            Assert.Equal((7, "007", "Usuário"), generator.User);
+            Assert.Equal((7, "007", "Usuário", 1), generator.User);
             Assert.Equal(1, generator.Calls);
             Assert.Same(generator.Result, response.Token);
             Assert.Equal("test-access-token", response.Token.AccessToken);
@@ -104,22 +104,22 @@ namespace InvestLens.UnitTests
         private static DadosLogin CreateUser(bool active = true) => new()
         {
             IdUsuario = 7, Codigo = "007", Nome = "Usuário", Email = "user@example.com",
-            SenhaHash = "stored-hash", Ativo = active
+            SenhaHash = "stored-hash", Ativo = active, IdPlano = 1
         };
 
         private sealed class JwtDouble : IJwtTokenGenerator
         {
             public int Calls { get; private set; }
-            public (int Id, string Codigo, string Nome)? User { get; private set; }
+            public (int Id, string Codigo, string Nome, int IdPlano)? User { get; private set; }
             public Token Result { get; } = new()
             {
                 AccessToken = "test-access-token",
                 Expiration = new DateTime(2030, 1, 2, 3, 4, 5, DateTimeKind.Utc)
             };
-            public Token Generate(int idUsuario, string codigo, string nome)
+            public Token Generate(int idUsuario, string codigo, string nome, int idPlano)
             {
                 Calls++;
-                User = (idUsuario, codigo, nome);
+                User = (idUsuario, codigo, nome, idPlano);
                 return Result;
             }
         }

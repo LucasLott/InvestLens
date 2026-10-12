@@ -21,6 +21,7 @@ namespace InvestLens.Infrastructure.Repositories
                               ,DS_Email AS Email
                               ,TX_Senha AS SenhaHash
                               ,FL_Ativo AS Ativo
+                              ,ID_Plano AS IdPlano
                         FROM dbo.fn_DadosLogin(@DS_Email)";
 
             var parameters = new DynamicParameters();

@@ -38,7 +38,7 @@ namespace InvestLens.Application.Services
                 Codigo = session.Codigo,
                 Nome = session.Nome,
                 Email = session.Email,
-                Token = jwt.Generate(session.IdUsuario, session.Codigo, session.Nome)
+                Token = jwt.Generate(session.IdUsuario, session.Codigo, session.Nome, session.IdPlano)
             }, new(replacement, DateTime.SpecifyKind(session.Expiracao, DateTimeKind.Utc)));
         }
 

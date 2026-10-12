@@ -5,5 +5,6 @@ namespace InvestLens.Application.Authentication
         public const string IdUsuario = "IdUsuario";
         public const string Codigo = "Codigo";
         public const string Nome = "Nome";
+        public const string IdPlano = "IdPlano";
     }
 }

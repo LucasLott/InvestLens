@@ -35,7 +35,7 @@ namespace InvestLens.IntegrationTests
             var settings = factory.Services.GetRequiredService<IOptions<JwtSettings>>().Value;
             string? token = null;
             if (scenario == "valid")
-                token = factory.Services.GetRequiredService<IJwtTokenGenerator>().Generate(123, "001", "Lucas").AccessToken;
+                token = factory.Services.GetRequiredService<IJwtTokenGenerator>().Generate(123, "001", "Lucas", 1).AccessToken;
             else if (scenario == "malformed") token = "sensitive-marker";
             else if (scenario != "missing")
             {

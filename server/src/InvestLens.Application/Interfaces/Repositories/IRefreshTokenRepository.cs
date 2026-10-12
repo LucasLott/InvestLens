@@ -14,6 +14,7 @@ namespace InvestLens.Application.Interfaces.Repositories
         public string Codigo { get; init; } = string.Empty;
         public string Nome { get; init; } = string.Empty;
         public string Email { get; init; } = string.Empty;
+        public int IdPlano { get; init; }
         public DateTime Expiracao { get; init; }
     }
 }

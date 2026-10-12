@@ -111,7 +111,7 @@ internal sealed class RefreshStore : IRefreshTokenRepository
     public Task CreateAsync(int userId, string hash, DateTime expiresAt, CancellationToken cancellationToken)
     {
         FirstHash ??= hash;
-        tokens.Add(hash, (new RefreshSession { IdUsuario = userId, Codigo = "007", Nome = "User", Email = "a@b.com", Expiracao = expiresAt }, false));
+        tokens.Add(hash, (new RefreshSession { IdUsuario = userId, Codigo = "007", Nome = "User", Email = "a@b.com", IdPlano = 1, Expiracao = expiresAt }, false));
         return Task.CompletedTask;
     }
     public Task<RefreshSession?> RotateAsync(string hash, string replacementHash, CancellationToken cancellationToken)

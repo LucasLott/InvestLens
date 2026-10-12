@@ -12,7 +12,8 @@ BEGIN
 
   DECLARE @NO_Tran      Integer = @@TRANCOUNT
          ,@CD_Usuario   Char(3)
-         ,@NO_Sequencia Integer;
+         ,@NO_Sequencia Integer
+         ,@ID_PlanoFree Integer;
 
   BEGIN TRY
     SELECT @ReturnCode = 0
@@ -63,6 +64,19 @@ BEGIN
     SET @NO_Sequencia = NEXT VALUE FOR dbo.SEQ_ILCAD001_CD_Usuario;
     SET @CD_Usuario = RIGHT('000' + CAST(@NO_Sequencia AS VARCHAR(3)), 3);
 
+    SELECT @ID_PlanoFree = ID_Plano
+    FROM dbo.ILCAD002
+    WHERE NM_Plano = 'Free'
+      AND FL_Ativo = 1;
+
+    IF @ID_PlanoFree IS NULL
+    BEGIN
+      SELECT @ReturnCode = 2
+            ,@ErrMsg = 'Plano Free ativo não encontrado.';
+
+      THROW 50002, @ErrMsg, 1;
+    END
+
     IF (@NO_Tran = 0) BEGIN TRAN;
 
     INSERT INTO dbo.ILCAD001 (CD_Usuario
@@ -71,6 +85,7 @@ BEGIN
                              ,DS_Email
                              ,TX_Senha
                              ,FL_Ativo
+                             ,ID_Plano
                              ,DH_Inclusao
                              ,DH_Alteracao)
     SELECT @CD_Usuario
@@ -79,6 +94,7 @@ BEGIN
           ,@DS_Email
           ,@TX_Senha
           ,@FL_Ativo
+          ,@ID_PlanoFree
           ,SYSDATETIME()
           ,NULL;
 

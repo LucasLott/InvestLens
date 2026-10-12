@@ -9,5 +9,6 @@ namespace InvestLens.Application.Models
         public string Email { get; init; } = string.Empty;
         public string SenhaHash { get; init; } = string.Empty;
         public bool Ativo { get; init; }
+        public int IdPlano { get; init; }
     }
 }

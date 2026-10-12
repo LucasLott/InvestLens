@@ -18,7 +18,7 @@ namespace InvestLens.Infrastructure.Security
         private readonly SymmetricSecurityKey _signingKey = signingKey;
         private readonly TimeProvider _timeProvider = timeProvider;
 
-        public Token Generate(int idUsuario, string codigo, string nome)
+        public Token Generate(int idUsuario, string codigo, string nome, int idPlano)
         {
             var settings = _options.Value;
 
@@ -30,7 +30,8 @@ namespace InvestLens.Infrastructure.Security
             Claim[] claims = [
                 new Claim(JwtClaimNames.IdUsuario, idUsuario.ToString(CultureInfo.InvariantCulture)),
                 new Claim(JwtClaimNames.Codigo, codigo),
-                new Claim(JwtClaimNames.Nome, nome)
+                new Claim(JwtClaimNames.Nome, nome),
+                new Claim(JwtClaimNames.IdPlano, idPlano.ToString(CultureInfo.InvariantCulture))
             ];
 
             var jwt = new JwtSecurityToken(issuer: settings.Issuer,

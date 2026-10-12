@@ -58,6 +58,8 @@ nunit-*.xml
 
 # Markdown documentation
 /docs/**/*.[mM][dD]
+!/docs/financial-database.md
+!/docs/plans.md
 !/docs/bolsai-integration.md
 
 # .NET local artifacts

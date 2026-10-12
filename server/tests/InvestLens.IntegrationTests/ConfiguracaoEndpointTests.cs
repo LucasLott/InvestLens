@@ -32,7 +32,7 @@ namespace InvestLens.IntegrationTests
             using var client = factory.CreateClient();
             if (cenario != "sem-token") client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>()
-                    .Generate(cenario == "propria" ? 15 : 27, "015", "Usuário").AccessToken);
+                    .Generate(cenario == "propria" ? 15 : 27, "015", "Usuário", 1).AccessToken);
 
             using var response = await EnviarAsync(client, method, "/api/usuarios/15/configuracao", Request());
 
@@ -53,7 +53,7 @@ namespace InvestLens.IntegrationTests
             await using var factory = CriarFactory(repository);
             using var client = factory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-                factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário").AccessToken);
+                factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário", 1).AccessToken);
 
             using var response = await EnviarAsync(client, method, "/api/usuarios/15/configuracao", Request());
 
@@ -75,7 +75,7 @@ namespace InvestLens.IntegrationTests
             await using var factory = CriarFactory(repository);
             using var client = factory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-                factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário").AccessToken);
+                factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário", 1).AccessToken);
             var body = new Dictionary<string, decimal> { ["plMaximo"] = 15, ["dyMinimo"] = 6, ["roeMinimo"] = 15,
                 ["dividaPatrimonioMaximo"] = 1, ["margemLiquidaMinimo"] = 20, ["retornoPreco"] = 6 };
             body[propriedade] = valor;
@@ -94,7 +94,7 @@ namespace InvestLens.IntegrationTests
             await using var factory = CriarFactory(repository);
             using var client = factory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-                factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário").AccessToken);
+                factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário", 1).AccessToken);
 
             using var created = await client.PostAsJsonAsync("/api/usuarios/15/configuracao", Request());
             Assert.Equal(HttpStatusCode.Created, created.StatusCode);

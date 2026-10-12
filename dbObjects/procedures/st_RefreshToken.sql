@@ -17,6 +17,7 @@ BEGIN
                               ,CD_Usuario   Varchar(3)
                               ,NM_Usuario   Varchar(80)
                               ,DS_Email     Varchar(255)
+                              ,ID_Plano     Integer
                               ,DH_Expiracao Datetime2(7));
 
   IF (@DS_Operacao NOT IN ('criar', 'rotacionar', 'revogar') OR @DS_Operacao IS NULL)
@@ -121,11 +122,13 @@ BEGIN
                               ,CD_Usuario
                               ,NM_Usuario
                               ,DS_Email
+                              ,ID_Plano
                               ,DH_Expiracao)
     SELECT ID_Usuario
           ,CD_Usuario
           ,NM_Usuario
           ,DS_Email
+          ,ID_Plano
           ,@DH_Expiracao
     FROM dbo.ILCAD001
     WHERE ID_Usuario = @ID_Usuario;
@@ -136,6 +139,7 @@ BEGIN
           ,CD_Usuario   AS Codigo
           ,NM_Usuario   AS Nome
           ,DS_Email     AS Email
+          ,ID_Plano     AS IdPlano
           ,DH_Expiracao AS Expiracao
     FROM @TB_Resultado;
   END TRY

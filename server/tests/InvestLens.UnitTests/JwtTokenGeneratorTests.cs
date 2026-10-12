@@ -15,7 +15,7 @@ namespace InvestLens.UnitTests
             var settings = Settings();
             var now = DateTimeOffset.UtcNow;
             var generator = new JwtTokenGenerator(Options.Create(settings), settings.CreateSigningKey(), new FixedTime(now));
-            var result = generator.Generate(123, "001", "Lucas");
+            var result = generator.Generate(123, "001", "Lucas", 9);
             Assert.False(string.IsNullOrWhiteSpace(result.AccessToken));
             var handler = new JwtSecurityTokenHandler { MapInboundClaims = false };
             var validation = Validation(settings);
@@ -27,7 +27,8 @@ namespace InvestLens.UnitTests
             Assert.Equal("123", principal.FindFirst("IdUsuario")?.Value);
             Assert.Equal("001", principal.FindFirst("Codigo")?.Value);
             Assert.Equal("Lucas", principal.FindFirst("Nome")?.Value);
-            Assert.Equal(new[] { "Codigo", "IdUsuario", "Nome", "aud", "exp", "iss", "nbf" }, jwt.Payload.Keys.Order(StringComparer.Ordinal).ToArray());
+            Assert.Equal("9", principal.FindFirst("IdPlano")?.Value);
+            Assert.Equal(new[] { "Codigo", "IdPlano", "IdUsuario", "Nome", "aud", "exp", "iss", "nbf" }, jwt.Payload.Keys.Order(StringComparer.Ordinal).ToArray());
             Assert.Equal(DateTimeKind.Utc, result.Expiration.Kind);
             Assert.Equal(jwt.ValidTo, result.Expiration);
             Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(now.ToUnixTimeSeconds()).AddMinutes(17).UtcDateTime, result.Expiration);
