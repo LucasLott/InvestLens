@@ -90,6 +90,19 @@
   margin-top: var(--space-1);
   color: var(--color-muted);
 }
+.cadastro-plano-selecionado {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-small);
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-size: 0.88rem;
+}
+.cadastro-plano-selecionado p {
+  margin-top: var(--space-1);
+  color: var(--color-muted);
+}
 .cadastro-card form {
   display: grid;
   gap: var(--space-3);

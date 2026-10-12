@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/investlens-logo.png';
+import perspectiva from '../../../imgs/perspectiva.png';
 import '../styles/home.css';
 
 export function HomePage() {
@@ -30,9 +30,12 @@ export function HomePage() {
             <p className="hero-description">
               Informação, critério e clareza para olhar seus investimentos por uma nova lente.
             </p>
-            <a className="button button-primary" href="#proposta">
-              Conheça a proposta <span aria-hidden="true">↗</span>
-            </a>
+            <Link className="button button-primary" to="/planos">
+              Conheça nossos planos <span aria-hidden="true">↗</span>
+            </Link>
+            <Link className="home-login-link" to="/login">
+              Já possui conta? Clique aqui para fazer login
+            </Link>
             <p className="hero-note">Uma experiência em construção. Um propósito claro.</p>
           </div>
           <figure className="brand-panel">
@@ -40,13 +43,7 @@ export function HomePage() {
               <span aria-hidden="true" />
               Perspectiva InvestLens
             </div>
-            <img
-              src={logo}
-              alt="InvestLens: uma lupa envolvendo o símbolo de crescimento"
-              width="1254"
-              height="1254"
-              fetchPriority="high"
-            />
+            <img src={perspectiva} alt="Perspectiva InvestLens" fetchPriority="high" />
             <figcaption>
               Mais contexto. <span>Mais clareza.</span>
             </figcaption>

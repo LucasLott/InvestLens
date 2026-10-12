@@ -1,6 +1,9 @@
 .plans-page {
-  min-height: 100svh;
-  padding-bottom: var(--space-8);
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-4);
+  overflow: hidden;
   background: radial-gradient(ellipse at 90% 0, var(--color-accent-soft), transparent 46%);
 }
 
@@ -26,7 +29,7 @@
 
 .plans-hero {
   max-width: 68rem;
-  padding-block: clamp(3rem, 8vw, 6rem) var(--space-7);
+  padding-block: clamp(1.5rem, 4vw, 3rem) var(--space-4);
 }
 
 .plans-hero h1 {
@@ -44,9 +47,11 @@
 }
 
 .plans-grid {
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-5);
+  align-content: start;
 }
 
 .plan-card {
@@ -94,7 +99,7 @@
 .plan-card ul {
   display: grid;
   gap: var(--space-3);
-  min-height: 11rem;
+  min-height: 8rem;
   margin: 0;
   padding: 0;
   list-style: none;

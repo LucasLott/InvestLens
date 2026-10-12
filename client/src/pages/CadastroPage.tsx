@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 import { Alert, FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { usuarioService } from '../services/usuarioService';
+import { planoService } from '../services/planoService';
+import type { Plano } from '../types/plano';
 import type { CadastroUsuarioRequest } from '../types/usuario';
 import { formatCpf, isValidCpf, sanitizeCpf } from '../utils/cpf';
 import logoSimple from '../../../imgs/logo_simples.png';
@@ -14,6 +16,7 @@ import '../styles/cadastro.css';
 
 type FormValues = CadastroUsuarioRequest & { aceitouTermos: boolean };
 type FormErrors = Partial<Record<keyof FormValues, string>>;
+type IntencaoDePlano = Pick<Plano, 'idPlano' | 'nome'>;
 
 const initialValues: FormValues = {
   nome: '',
@@ -26,6 +29,7 @@ const initialValues: FormValues = {
 
 export function CadastroPage() {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
   const [values, setValues] = useState<FormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -33,6 +37,24 @@ export function CadastroPage() {
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [planoSelecionado, setPlanoSelecionado] = useState<Plano | null>(null);
+  const intencaoDePlano = useMemo(() => obterIntencaoDePlano(location.state), [location.state]);
+
+  useEffect(() => {
+    if (!intencaoDePlano) return;
+
+    planoService
+      .listar()
+      .then((planos) =>
+        setPlanoSelecionado(
+          planos.find(
+            (plano) =>
+              plano.idPlano === intencaoDePlano.idPlano && plano.nome === intencaoDePlano.nome,
+          ) ?? null,
+        ),
+      )
+      .catch(() => setPlanoSelecionado(null));
+  }, [intencaoDePlano]);
 
   useEffect(() => {
     if (!success) return;
@@ -97,6 +119,20 @@ export function CadastroPage() {
             <h2>Cadastro</h2>
             <p>Preencha seus dados para criar sua conta.</p>
           </header>
+          {planoSelecionado && (
+            <aside className="cadastro-plano-selecionado" role="status">
+              <strong>
+                {planoSelecionado.nome === 'Pro'
+                  ? 'Plano de interesse: Pro'
+                  : `Plano selecionado: ${planoSelecionado.nome}`}
+              </strong>
+              {planoSelecionado.nome === 'Pro' && (
+                <p>
+                  A contratação do Pro estará disponível em breve. Sua conta será criada no Free.
+                </p>
+              )}
+            </aside>
+          )}
           <form id="cadastro-form" onSubmit={submit} noValidate>
             <FormField label="Nome" htmlFor="nome" error={errors.nome}>
               <Input
@@ -242,4 +278,17 @@ function messageFor(error: unknown) {
   if (isAxiosError(error) && error.response?.status === 400)
     return 'Revise os dados informados e tente novamente.';
   return 'Não foi possível concluir o cadastro. Tente novamente.';
+}
+
+function obterIntencaoDePlano(state: unknown): IntencaoDePlano | null {
+  if (!state || typeof state !== 'object' || !('planoSelecionado' in state)) return null;
+
+  const plano = state.planoSelecionado;
+  if (!plano || typeof plano !== 'object') return null;
+  if (!('idPlano' in plano) || !('nome' in plano)) return null;
+  if (typeof plano.idPlano !== 'number' || !Number.isInteger(plano.idPlano) || plano.idPlano <= 0)
+    return null;
+  if (typeof plano.nome !== 'string' || !plano.nome.trim()) return null;
+
+  return { idPlano: plano.idPlano, nome: plano.nome };
 }

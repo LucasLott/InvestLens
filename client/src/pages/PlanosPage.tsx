@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { Button } from '../components/ui/Button';
 import { planoService } from '../services/planoService';
@@ -24,9 +24,10 @@ const recursosPorPlano: Record<string, string[]> = {
 
 export function PlanosPage() {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [planos, setPlanos] = useState<Plano[] | null>(null);
   const [erro, setErro] = useState(false);
-  const [avisoPro, setAvisoPro] = useState(false);
+  const [planoEmInteresse, setPlanoEmInteresse] = useState<Plano | null>(null);
 
   const carregarPlanos = () => {
     setErro(false);
@@ -43,14 +44,30 @@ export function PlanosPage() {
       .catch(() => setErro(true));
   }, []);
 
+  const selecionarPlano = (plano: Plano) => {
+    if (isAuthenticated) {
+      setPlanoEmInteresse(plano);
+      return;
+    }
+
+    navigate('/cadastro', {
+      state: {
+        planoSelecionado: {
+          idPlano: plano.idPlano,
+          nome: plano.nome,
+        },
+      },
+    });
+  };
+
   return (
     <main className="plans-page">
       <header className="plans-header container">
-        <Link className="wordmark" to={isAuthenticated ? '/inicio' : '/login'}>
+        <Link className="wordmark" to="/">
           Invest<span>Lens</span>
         </Link>
-        <Link className="ui-button ui-button-ghost" to={isAuthenticated ? '/inicio' : '/login'}>
-          {isAuthenticated ? 'Voltar ao início' : 'Entrar'}
+        <Link className="ui-button ui-button-ghost" to="/">
+          Voltar ao início
         </Link>
       </header>
 
@@ -90,25 +107,23 @@ export function PlanosPage() {
                   ),
                 )}
               </ul>
-              {plano.nome === 'Free' ? (
-                <Link
-                  className="ui-button ui-button-secondary"
-                  to={isAuthenticated ? '/inicio' : '/cadastro'}
-                >
-                  {isAuthenticated ? 'Continuar' : 'Criar conta gratuita'}
-                </Link>
-              ) : (
-                <Button onClick={() => setAvisoPro(true)}>Conhecer o Pro</Button>
-              )}
+              <Button
+                variant={plano.nome === 'Pro' ? 'primary' : 'secondary'}
+                onClick={() => selecionarPlano(plano)}
+              >
+                Escolher {plano.nome}
+              </Button>
             </article>
           ))}
         </section>
       )}
 
-      {avisoPro && (
+      {planoEmInteresse && (
         <section className="plans-message container" role="status">
-          <strong>O InvestLens Pro estará disponível em breve.</strong>
-          <p>A contratação não está ativa e nenhum acesso foi alterado.</p>
+          <strong>
+            Você já está conectado. A seleção do plano {planoEmInteresse.nome} não altera sua conta.
+          </strong>
+          <p>A contratação e alteração de plano estarão disponíveis em breve.</p>
         </section>
       )}
     </main>

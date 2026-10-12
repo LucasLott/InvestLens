@@ -1,7 +1,8 @@
 .home {
-  min-height: 100svh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: radial-gradient(ellipse at 90% 30%, var(--color-accent-soft) 0, transparent 48%);
 }
 .home main {
@@ -80,6 +81,14 @@
 }
 .hero .button span {
   font-size: 1.25rem;
+}
+.home-login-link {
+  display: block;
+  width: fit-content;
+  margin-top: var(--space-4);
+  color: var(--color-primary);
+  font-size: 0.88rem;
+  font-weight: 650;
 }
 .hero-note {
   margin-top: var(--space-5);
