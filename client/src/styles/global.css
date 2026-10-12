@@ -1,5 +1,9 @@
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
   background: var(--color-background);
@@ -8,14 +12,47 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, p, figure { margin: 0; }
-a { color: inherit; text-underline-offset: 0.2em; }
-button, input, select, textarea { font: inherit; }
-img { display: block; max-width: 100%; height: auto; }
-::selection { background: var(--color-accent-soft); color: var(--color-text); }
-:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 5px; }
-.container { width: min(var(--page-width), calc(100% - var(--page-gutter) * 2)); margin-inline: auto; }
-.eyebrow { color: var(--color-primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+h1,
+h2,
+h3,
+p,
+figure {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+}
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 5px;
+}
+.container {
+  width: min(var(--page-width), calc(100% - var(--page-gutter) * 2));
+  margin-inline: auto;
+}
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
 .skip-link {
   position: fixed;
   top: var(--space-4);
@@ -27,7 +64,9 @@ img { display: block; max-width: 100%; height: auto; }
   color: var(--color-surface);
   transform: translateY(-200%);
 }
-.skip-link:focus { transform: translateY(0); }
+.skip-link:focus {
+  transform: translateY(0);
+}
 .button {
   display: inline-flex;
   align-items: center;
@@ -40,20 +79,105 @@ img { display: block; max-width: 100%; height: auto; }
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
+  transition:
+    background var(--transition),
+    transform var(--transition);
 }
-.button-primary { background: var(--color-primary); color: var(--color-surface); }
-.button-primary:hover { background: var(--color-primary-hover); }
-.button-primary:active { background: var(--color-primary-active); transform: translateY(1px); }
-.button:disabled { background: var(--color-disabled); color: var(--color-disabled-text); cursor: not-allowed; transform: none; }
-.button[aria-busy='true'] { cursor: progress; }
-.ui-button { display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2); min-height:44px; padding:.7rem 1rem; border:1px solid transparent; border-radius:var(--radius-small); font-weight:650; text-decoration:none; cursor:pointer; transition:background var(--transition), color var(--transition), transform var(--transition); }.ui-button-primary { background:var(--color-primary); color:var(--color-surface); }.ui-button-primary:hover:not(:disabled) { background:var(--color-primary-hover); }.ui-button-secondary { border-color:var(--color-primary); background:transparent; color:var(--color-primary); }.ui-button-secondary:hover:not(:disabled) { background:var(--color-accent-soft); }.ui-button-ghost { background:transparent; color:var(--color-text); }.ui-button-ghost:hover:not(:disabled) { background:var(--color-accent-soft); }.ui-button:disabled { background:var(--color-disabled); color:var(--color-disabled-text); cursor:progress; }.ui-button:active:not(:disabled) { transform:translateY(1px); }
-.startup-error { max-width: 42rem; margin: var(--space-9) auto; padding: var(--space-6); }
-.startup-error h1 { margin-block: var(--space-4); font-size: clamp(1.75rem, 5vw, 2.5rem); line-height: 1.2; }
-.startup-error p { overflow-wrap: anywhere; }
-.auth-initializing { max-width: 42rem; margin: var(--space-9) auto; padding: var(--space-6); }
-.auth-initializing h1 { margin-block: var(--space-4); font-size: clamp(1.75rem, 5vw, 2.5rem); line-height: 1.2; }
+.button-primary {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+.button-primary:hover {
+  background: var(--color-primary-hover);
+}
+.button-primary:active {
+  background: var(--color-primary-active);
+  transform: translateY(1px);
+}
+.button:disabled {
+  background: var(--color-disabled);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+  transform: none;
+}
+.button[aria-busy='true'] {
+  cursor: progress;
+}
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition);
+}
+.ui-button-primary {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+.ui-button-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+.ui-button-secondary {
+  border-color: var(--color-primary);
+  background: transparent;
+  color: var(--color-primary);
+}
+.ui-button-secondary:hover:not(:disabled) {
+  background: var(--color-accent-soft);
+}
+.ui-button-ghost {
+  background: transparent;
+  color: var(--color-text);
+}
+.ui-button-ghost:hover:not(:disabled) {
+  background: var(--color-accent-soft);
+}
+.ui-button:disabled {
+  background: var(--color-disabled);
+  color: var(--color-disabled-text);
+  cursor: progress;
+}
+.ui-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.startup-error {
+  max-width: 42rem;
+  margin: var(--space-9) auto;
+  padding: var(--space-6);
+}
+.startup-error h1 {
+  margin-block: var(--space-4);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+}
+.startup-error p {
+  overflow-wrap: anywhere;
+}
+.auth-initializing {
+  max-width: 42rem;
+  margin: var(--space-9) auto;
+  padding: var(--space-6);
+}
+.auth-initializing h1 {
+  margin-block: var(--space-4);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+}
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .button { transition: none; }
+  html {
+    scroll-behavior: auto;
+  }
+  .button {
+    transition: none;
+  }
 }

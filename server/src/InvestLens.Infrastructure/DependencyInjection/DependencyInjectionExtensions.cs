@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using InvestLens.Infrastructure.Bolsai;
 using InvestLens.Application.Interfaces.Providers;
+using InvestLens.Application.Interfaces.Repositories;
 
 namespace InvestLens.Infrastructure.DependencyInjection
 {
@@ -21,9 +22,10 @@ namespace InvestLens.Infrastructure.DependencyInjection
             services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IConfiguracaoRepository, ConfiguracaoRepository>();
-            services.AddScoped<InvestLens.Application.Interfaces.Repositories.IRefreshTokenRepository, RefreshTokenRepository>();
-            services.AddScoped<InvestLens.Application.Interfaces.Repositories.IFinancialImportRepository, FinancialImportRepository>();
-            services.AddScoped<InvestLens.Application.Interfaces.Repositories.IFinancialUpdateRepository, FinancialUpdateRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IFinancialImportRepository, FinancialImportRepository>();
+            services.AddScoped<IFinancialUpdateRepository, FinancialUpdateRepository>();
+            services.AddScoped<IPlanoRepository, PlanoRepository>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidator>();
             services.AddSingleton<SymmetricSecurityKey>(provider => provider.GetRequiredService<IOptions<JwtSettings>>().Value.CreateSigningKey());
