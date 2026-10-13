@@ -26,6 +26,7 @@ namespace InvestLens.Infrastructure.DependencyInjection
             services.AddScoped<IFinancialImportRepository, FinancialImportRepository>();
             services.AddScoped<IFinancialUpdateRepository, FinancialUpdateRepository>();
             services.AddScoped<IPlanoRepository, PlanoRepository>();
+            services.AddScoped<IAssinaturaRepository, AssinaturaRepository>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidator>();
             services.AddSingleton<SymmetricSecurityKey>(provider => provider.GetRequiredService<IOptions<JwtSettings>>().Value.CreateSigningKey());

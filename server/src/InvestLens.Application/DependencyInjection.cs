@@ -22,6 +22,7 @@ namespace InvestLens.Application
             services.AddScoped<IFinancialUpdateService, FinancialUpdateService>();
             services.AddSingleton<IFinancialFeatureAccess, ConservativeFinancialFeatureAccess>();
             services.AddScoped<IPlanoService, PlanoService>();
+            services.AddScoped<IAssinaturaService, AssinaturaService>();
 
             return services;
         }

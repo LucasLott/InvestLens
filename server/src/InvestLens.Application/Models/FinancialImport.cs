@@ -1,4 +1,7 @@
-namespace InvestLens.Application.Models;
+namespace InvestLens.Application.Models
+{
+    public sealed record FinancialImportResult(string Ticker,
+                                               DateTime ImportedAtUtc,
+                                               string Message);
 
-public sealed record FinancialImportResult(string Ticker, DateTime ImportedAtUtc, string Message);
-
+}
