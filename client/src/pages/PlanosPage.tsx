@@ -11,23 +11,11 @@ const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 });
 
-const recursosPorPlano: Record<string, string[]> = {
-  Free: ['Busca de ativos', 'Informações básicas', 'Cotação atual', 'Indicadores atuais'],
-  Pro: [
-    'Tudo do Free',
-    'Histórico de proventos',
-    'Históricos avançados',
-    'Screener e filtros',
-    'Preço máximo',
-  ],
-};
-
 export function PlanosPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [planos, setPlanos] = useState<Plano[] | null>(null);
   const [erro, setErro] = useState(false);
-  const [planoEmInteresse, setPlanoEmInteresse] = useState<Plano | null>(null);
 
   const carregarPlanos = () => {
     setErro(false);
@@ -46,7 +34,9 @@ export function PlanosPage() {
 
   const selecionarPlano = (plano: Plano) => {
     if (isAuthenticated) {
-      setPlanoEmInteresse(plano);
+      navigate(plano.valor > 0 ? '/finalizar-contratacao' : '/inicio', {
+        state: { idPlano: plano.idPlano },
+      });
       return;
     }
 
@@ -98,15 +88,7 @@ export function PlanosPage() {
               <h2>{plano.nome}</h2>
               <p className="plan-price">
                 <strong>{formatadorMoeda.format(plano.valor)}</strong>
-                {plano.nome === 'Pro' && <span>/ mês</span>}
               </p>
-              <ul>
-                {(recursosPorPlano[plano.nome] ?? ['Detalhes do plano disponíveis em breve.']).map(
-                  (recurso) => (
-                    <li key={recurso}>✓ {recurso}</li>
-                  ),
-                )}
-              </ul>
               <Button
                 variant={plano.nome === 'Pro' ? 'primary' : 'secondary'}
                 onClick={() => selecionarPlano(plano)}
@@ -115,15 +97,6 @@ export function PlanosPage() {
               </Button>
             </article>
           ))}
-        </section>
-      )}
-
-      {planoEmInteresse && (
-        <section className="plans-message container" role="status">
-          <strong>
-            Você já está conectado. A seleção do plano {planoEmInteresse.nome} não altera sua conta.
-          </strong>
-          <p>A contratação e alteração de plano estarão disponíveis em breve.</p>
         </section>
       )}
     </main>

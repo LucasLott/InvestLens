@@ -55,7 +55,7 @@ export function CadastroPage() {
       .catch(() => setPlanoSelecionado(null));
   }, [intencaoDePlano]);
 
-  if (isAuthenticated) return <Navigate to="/inicio" replace />;
+  if (isAuthenticated && !isSubmitting) return <Navigate to="/inicio" replace />;
 
   const update = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setValues((current) => ({ ...current, [key]: value }));
@@ -76,8 +76,20 @@ export function CadastroPage() {
     try {
       await usuarioService.cadastrar(request);
       setValues(initialValues);
+      const planos = intencaoDePlano ? await planoService.listar().catch(() => []) : [];
+      const plano = planos.find(
+        (item) => item.idPlano === intencaoDePlano?.idPlano && item.nome === intencaoDePlano.nome,
+      );
       await login({ email: request.email, senha: request.senha });
-      navigate('/inicio', { replace: true });
+      navigate(plano && plano.valor > 0 ? '/finalizar-contratacao' : '/inicio', {
+        replace: true,
+        state:
+          plano && plano.valor > 0
+            ? { idPlano: plano.idPlano }
+            : intencaoDePlano && !plano
+              ? { aviso: 'O plano escolhido está indisponível. Sua conta permanece no Free.' }
+              : undefined,
+      });
     } catch (exception: unknown) {
       setError(messageFor(exception));
     } finally {

@@ -8,6 +8,8 @@ import { LoginPage } from '../pages/LoginPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { PlanosPage } from '../pages/PlanosPage';
+import { FinalizarContratacaoPage } from '../pages/FinalizarContratacaoPage';
+import { MinhaAssinaturaPage } from '../pages/MinhaAssinaturaPage';
 
 export function AppRoutes() {
   return (
@@ -25,6 +27,8 @@ export function AppRoutes() {
       >
         <Route path="/inicio" element={<AuthenticatedHomePage />} />
         <Route path="/configuracao" element={<ConfigurationPage />} />
+        <Route path="/finalizar-contratacao" element={<FinalizarContratacaoPage />} />
+        <Route path="/minha-assinatura" element={<MinhaAssinaturaPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

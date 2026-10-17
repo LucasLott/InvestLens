@@ -29,6 +29,9 @@ export function AppLayout() {
           <NavLink to="/configuracao" onClick={() => setOpen(false)}>
             Configuração
           </NavLink>
+          <NavLink to="/minha-assinatura" onClick={() => setOpen(false)}>
+            Minha assinatura
+          </NavLink>
         </nav>
         <div className="app-user">
           <span aria-hidden="true">{user?.nome.slice(0, 1)}</span>

@@ -15,7 +15,7 @@ namespace InvestLens.Api.ExceptionHandling
             {
                 CredenciaisInvalidasException => 401,
                 ConfiguracaoNaoEncontradaException => 404,
-                ConfiguracaoJaExisteException => 409,
+                ConfiguracaoJaExisteException or SolicitacaoConflitanteException => 409,
                 ValidationException or BusinessException => 400,
                 BadHttpRequestException request when request.StatusCode is 400 or 401 or 403 or 404 or 409 => request.StatusCode,
                 _ => 500

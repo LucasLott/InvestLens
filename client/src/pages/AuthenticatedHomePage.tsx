@@ -1,14 +1,16 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { PageHeader } from '../components/ui/PageHeader';
 export function AuthenticatedHomePage() {
   const { user } = useAuth();
+  const location = useLocation();
   return (
     <>
       <PageHeader
         title={`Olá, ${user?.nome}.`}
         description="Sua área de análise está pronta para receber os critérios que orientam suas decisões."
       />
+      {typeof location.state?.aviso === 'string' && <p role="status">{location.state.aviso}</p>}
       <section className="empty-state">
         <span aria-hidden="true">↗</span>
         <h2>Comece pela sua configuração.</h2>

@@ -26,6 +26,11 @@ namespace InvestLens.Infrastructure.Database.Extensions
 
                 if (sqlException.Number == 50001)
                 {
+                    if (sqlException.Procedure is "st_RegistrarSolicitacao" or "dbo.st_RegistrarSolicitacao")
+                    {
+                        if (sqlException.State == 2) throw new SolicitacaoConflitanteException();
+                        if (sqlException.State == 1) throw new BusinessException();
+                    }
                     if (sqlException.Procedure is "st_ConfiguracaoAdd" or "dbo.st_ConfiguracaoAdd")
                     {
                         if (sqlException.State == 2) throw new ConfiguracaoNaoEncontradaException();

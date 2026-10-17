@@ -71,6 +71,7 @@ nunit-*.xml
 !/docs/fundamental-analysis.md
 !/docs/financial-access.md
 !/docs/frontend-plans.md
+!/docs/plan-management.md
 !/docs/front-rules.md
 !/docs/bolsai-integration.md
 
