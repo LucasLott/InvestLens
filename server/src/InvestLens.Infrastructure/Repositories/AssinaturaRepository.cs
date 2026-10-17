@@ -7,6 +7,17 @@ namespace InvestLens.Infrastructure.Repositories
 {
     public sealed class AssinaturaRepository(IDbConnectionFactory factory) : IAssinaturaRepository
     {
+        public async Task<bool> PossuiPagamentoConfirmadoAsync(int idUsuario, CancellationToken cancellationToken)
+        {
+            await using var connection = factory.CreateConnection();
+            return await connection.ExecuteScalarAsync<bool>(new CommandDefinition("""
+                SELECT CAST(CASE WHEN EXISTS (SELECT 1 FROM dbo.ILCAD003 A
+                  INNER JOIN dbo.ILCAD004 P ON P.ID_Assinatura = A.ID_Assinatura AND P.ID_Usuario = A.ID_Usuario AND P.ID_Plano = A.ID_Plano
+                  WHERE A.ID_Usuario = @IdUsuario AND P.CD_Status = 'CONFIRMADO' AND P.DH_Pagamento >= A.DH_Inicio_Assinatura AND P.DH_Pagamento < A.DH_Fim_Assinatura AND P.DH_Pagamento <= SYSUTCDATETIME())
+                  THEN 1 ELSE 0 END AS BIT)
+                """, new { IdUsuario = idUsuario }, cancellationToken: cancellationToken));
+        }
+
         public async Task<AssinaturaAtual?> ObterAtualAsync(int idUsuario, CancellationToken cancellationToken)
         {
             const string sql = @"SELECT Cadastro.NM_Plano AS PlanoCadastrado

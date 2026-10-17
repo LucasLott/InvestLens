@@ -106,7 +106,7 @@ public class ConfiguracaoSecurityTests
             body["dataAlteracao"] = "1900-01-01T00:00:00";
             body["DH_Alteracao"] = "1900-01-01T00:00:00";
         }
-        var uri = $"/api/usuarios/{(propria ? 10 : 11)}/configuracao";
+        var uri = $"/api/v1/usuarios/{(propria ? 10 : 11)}/configuracao";
         if (origem == "query") uri += $"?idUsuario={idExterno}&ID_Usuario={idExterno}&idConfiguracao=987654";
         using var request = new HttpRequestMessage(new HttpMethod(metodo), uri) { Content = JsonContent.Create(body) };
         request.Headers.Authorization = new("Bearer", Token(factory));
@@ -215,23 +215,23 @@ public class ConfiguracaoSecurityTests
         using var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new("Bearer", Token(factory));
 
-        using var getAusente = await client.GetAsync("/api/usuarios/10/configuracao");
-        using var putAusente = await client.PutAsJsonAsync("/api/usuarios/10/configuracao", Body());
+        using var getAusente = await client.GetAsync("/api/v1/usuarios/10/configuracao");
+        using var putAusente = await client.PutAsJsonAsync("/api/v1/usuarios/10/configuracao", Body());
         Assert.Equal(HttpStatusCode.NotFound, getAusente.StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, putAusente.StatusCode);
         Assert.Empty(repository.Registros);
         Assert.Equal(0, repository.Inclusoes);
 
-        using var post = await client.PostAsJsonAsync("/api/usuarios/10/configuracao", Body());
+        using var post = await client.PostAsJsonAsync("/api/v1/usuarios/10/configuracao", Body());
         Assert.Equal(HttpStatusCode.Created, post.StatusCode);
         var antes = JsonSerializer.Serialize(repository.Registros);
         var body = Body();
         body["plMaximo"] = 99m;
-        using var duplicado = await client.PostAsJsonAsync("/api/usuarios/10/configuracao", body);
+        using var duplicado = await client.PostAsJsonAsync("/api/v1/usuarios/10/configuracao", body);
         Assert.Equal(HttpStatusCode.Conflict, duplicado.StatusCode);
         Assert.Equal(antes, JsonSerializer.Serialize(repository.Registros));
         var gravacoes = repository.Inclusoes + repository.Alteracoes;
-        using var get = await client.GetAsync("/api/usuarios/10/configuracao");
+        using var get = await client.GetAsync("/api/v1/usuarios/10/configuracao");
         Assert.Equal(HttpStatusCode.OK, get.StatusCode);
         Assert.Equal(antes, JsonSerializer.Serialize(repository.Registros));
         Assert.Equal(gravacoes, repository.Inclusoes + repository.Alteracoes);
@@ -241,7 +241,9 @@ public class ConfiguracaoSecurityTests
     private static WebApplicationFactory<Program> CriarFactory(RepositorioObservado repository, ServicoObservado service) =>
         new TestApiFactory().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
-            services.RemoveAll<IConfiguracaoRepository>();
+            services.RemoveAll<InvestLens.Application.Interfaces.Services.IFuncionalidadeService>();
+              services.AddSingleton<InvestLens.Application.Interfaces.Services.IFuncionalidadeService, FuncionalidadePermitidaParaTestes>();
+              services.RemoveAll<IConfiguracaoRepository>();
             services.RemoveAll<IConfiguracaoService>();
             services.AddSingleton<IConfiguracaoRepository>(repository);
             services.AddSingleton<IConfiguracaoService>(service);
@@ -267,7 +269,7 @@ public class ConfiguracaoSecurityTests
     };
 
     private static HttpRequestMessage CriarRequest(string metodo, int idUsuario, object? body = null) =>
-        new(new HttpMethod(metodo), $"/api/usuarios/{idUsuario}/configuracao") { Content = JsonContent.Create(body ?? Body()) };
+        new(new HttpMethod(metodo), $"/api/v1/usuarios/{idUsuario}/configuracao") { Content = JsonContent.Create(body ?? Body()) };
 
     private static async Task ProblemaSemDados(HttpResponseMessage response, int status)
     {

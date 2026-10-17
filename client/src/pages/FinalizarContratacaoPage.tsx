@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Funcionalidades } from '../components/Funcionalidades';
 import { planoService } from '../services/planoService';
 import type { Plano } from '../types/plano';
 
@@ -17,7 +18,7 @@ export function FinalizarContratacaoPage() {
       .catch(() => setErro(true));
   }, []);
 
-  const plano = planos?.find((item) => item.idPlano === idPlano && item.valor > 0);
+  const plano = planos?.find((item) => item.idPlano === idPlano);
   return (
     <>
       <PageHeader
@@ -37,7 +38,11 @@ export function FinalizarContratacaoPage() {
             )}
           </p>
           <p>A contratação online estará disponível em breve.</p>
-          <p>As funcionalidades do plano estão indisponíveis para consulta no momento.</p>
+          {plano.nome === 'Pro' || plano.nome === 'Free' ? (
+            <Funcionalidades modo={plano.nome === 'Pro' ? 'pro' : 'free'} />
+          ) : (
+            <p>Funcionalidades deste plano indisponíveis.</p>
+          )}
           <p>Esta escolha não altera seu plano efetivo.</p>
         </section>
       ) : (

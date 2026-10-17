@@ -14,7 +14,8 @@ public sealed class AssinaturaService(IAssinaturaRepository repository, TimeProv
         
         var premium = assinatura is not null && assinatura.PlanoAssinatura == "Pro"
             && assinatura.StatusAssinatura == "ATIVA"
-            && assinatura.InicioVigencia <= agora && agora < assinatura.FimVigencia;
+            && assinatura.InicioVigencia <= agora && agora < assinatura.FimVigencia
+            && await repository.PossuiPagamentoConfirmadoAsync(idUsuario, cancellationToken);
 
         return new MinhaAssinaturaResponse(assinatura?.PlanoCadastrado ?? "Free",
                                            premium ? "Pro" : "Free",

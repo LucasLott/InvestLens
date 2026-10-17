@@ -29,6 +29,17 @@ namespace InvestLens.UnitTests
             Assert.Null(repository.Plano);
         }
 
+        [Fact]
+        public async Task ListaSomenteValoresValidosESinalizaAcessoFree()
+        {
+            var repository = new Repository { Itens = [(1, "BASICO", "N"), (2, "AVANCADO", "S"), (3, "INVALIDO", "X")] };
+            var service = new FuncionalidadeService(new Assinatura("Free"), repository);
+            var resultado = await service.ListarAsync(42, CancellationToken.None);
+            Assert.Equal(2, resultado.Count);
+            Assert.True(resultado.Single(x => x.Nome == "BASICO").Disponivel);
+            Assert.False(resultado.Single(x => x.Nome == "AVANCADO").Disponivel);
+        }
+
         private sealed class Assinatura(string plano) : IAssinaturaService
         {
             public Task<MinhaAssinaturaResponse> ObterMinhaAsync(int idUsuario, CancellationToken cancellationToken) =>
@@ -38,6 +49,8 @@ namespace InvestLens.UnitTests
         private sealed class Repository : IFuncionalidadeRepository
         {
             public string? Plano { get; private set; }
+            public IReadOnlyList<(int Id, string Nome, string Pro)> Itens { get; init; } = [];
+            public Task<IReadOnlyList<(int Id, string Nome, string Pro)>> ListarAsync(CancellationToken cancellationToken) => Task.FromResult(Itens);
 
             public Task<bool> PossuiPermissaoAsync(string planoEfetivo, string chave, CancellationToken cancellationToken)
             {

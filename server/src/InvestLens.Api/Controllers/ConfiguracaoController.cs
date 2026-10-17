@@ -9,6 +9,7 @@ namespace InvestLens.Api.Controllers
     [ApiController]
     [Route("usuarios/{idUsuario:int}/configuracao")]
     [Authorize(Policy = AuthorizationPolicies.SameUser)]
+    [Authorize(Policy = "ConfiguracaoCriterios")]
     public sealed class ConfiguracaoController(IConfiguracaoService configuracaoService) : ControllerBase
     {
         [HttpGet]

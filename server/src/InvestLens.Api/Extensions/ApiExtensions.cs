@@ -96,7 +96,12 @@ namespace InvestLens.Api.Extensions
         {
             var swagger = app.Services.GetRequiredService<IOptions<SwaggerSettings>>().Value;
 
-            if (swagger.EnableSwaggerProd || app.Environment.IsDevelopment())
+#if DEBUG
+            const bool habilitado = true;
+#else
+            var habilitado = swagger.EnableSwaggerProd;
+#endif
+            if (habilitado)
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(options =>

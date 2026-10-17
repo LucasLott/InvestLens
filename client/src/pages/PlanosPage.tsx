@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { Button } from '../components/ui/Button';
+import { Funcionalidades } from '../components/Funcionalidades';
 import { planoService } from '../services/planoService';
 import '../styles/planos.css';
 import type { Plano } from '../types/plano';
@@ -99,6 +100,7 @@ export function PlanosPage() {
           ))}
         </section>
       )}
+      <Funcionalidades modo="comparacao" />
     </main>
   );
 }

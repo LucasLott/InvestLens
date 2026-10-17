@@ -5,5 +5,6 @@ namespace InvestLens.Application.Interfaces.Repositories
     public interface IAssinaturaRepository
     {
         Task<AssinaturaAtual?> ObterAtualAsync(int idUsuario, CancellationToken cancellationToken);
+        Task<bool> PossuiPagamentoConfirmadoAsync(int idUsuario, CancellationToken cancellationToken);
     }
 }

@@ -34,7 +34,7 @@ namespace InvestLens.IntegrationTests
                 new AuthenticationHeaderValue("Bearer", factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>()
                     .Generate(cenario == "propria" ? 15 : 27, "015", "Usuário", 1).AccessToken);
 
-            using var response = await EnviarAsync(client, method, "/api/usuarios/15/configuracao", Request());
+            using var response = await EnviarAsync(client, method, "/api/v1/usuarios/15/configuracao", Request());
 
             Assert.Equal(statusEsperado, (int)response.StatusCode);
             var chamadasEsperadas = statusEsperado == 200 && method == "GET" ? 1
@@ -55,7 +55,7 @@ namespace InvestLens.IntegrationTests
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
                 factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário", 1).AccessToken);
 
-            using var response = await EnviarAsync(client, method, "/api/usuarios/15/configuracao", Request());
+            using var response = await EnviarAsync(client, method, "/api/v1/usuarios/15/configuracao", Request());
 
             Assert.Equal(statusEsperado, (int)response.StatusCode);
             await ProblemaSeguro(response, statusEsperado);
@@ -80,7 +80,7 @@ namespace InvestLens.IntegrationTests
                 ["dividaPatrimonioMaximo"] = 1, ["margemLiquidaMinimo"] = 20, ["retornoPreco"] = 6 };
             body[propriedade] = valor;
 
-            using var response = await client.PostAsJsonAsync("/api/usuarios/15/configuracao", body);
+            using var response = await client.PostAsJsonAsync("/api/v1/usuarios/15/configuracao", body);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Equal(0, repository.Calls);
@@ -96,12 +96,12 @@ namespace InvestLens.IntegrationTests
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
                 factory.Services.GetRequiredService<InvestLens.Application.Interfaces.Security.IJwtTokenGenerator>().Generate(15, "015", "Usuário", 1).AccessToken);
 
-            using var created = await client.PostAsJsonAsync("/api/usuarios/15/configuracao", Request());
+            using var created = await client.PostAsJsonAsync("/api/v1/usuarios/15/configuracao", Request());
             Assert.Equal(HttpStatusCode.Created, created.StatusCode);
-            Assert.Equal("/api/usuarios/15/configuracao", created.Headers.Location?.AbsolutePath);
+            Assert.Equal("/api/v1/usuarios/15/configuracao", created.Headers.Location?.AbsolutePath);
             await ValidarResponse(created, 15, 15, null);
 
-            using var updated = await client.PutAsJsonAsync("/api/usuarios/15/configuracao", new
+            using var updated = await client.PutAsJsonAsync("/api/v1/usuarios/15/configuracao", new
             {
                 plMaximo = 16m, dyMinimo = 7m, roeMinimo = 17m, dividaPatrimonioMaximo = 2m,
                 margemLiquidaMinimo = 21m, retornoPreco = 8m
@@ -114,7 +114,9 @@ namespace InvestLens.IntegrationTests
         private static WebApplicationFactory<Program> CriarFactory(ConfiguracaoDouble repository) =>
             new TestApiFactory().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
             {
-                services.RemoveAll<IConfiguracaoRepository>();
+                services.RemoveAll<InvestLens.Application.Interfaces.Services.IFuncionalidadeService>();
+              services.AddSingleton<InvestLens.Application.Interfaces.Services.IFuncionalidadeService, FuncionalidadePermitidaParaTestes>();
+              services.RemoveAll<IConfiguracaoRepository>();
                 services.AddSingleton<IConfiguracaoRepository>(repository);
             }));
 

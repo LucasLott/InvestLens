@@ -3,7 +3,6 @@ using InvestLens.Application.Interfaces.Services.Auth;
 using InvestLens.Application.Interfaces.Services.Usuario;
 using InvestLens.Application.Interfaces.Services.Configuracao;
 using InvestLens.Application.Interfaces.Services;
-using InvestLens.Application.Authorization;
 using InvestLens.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,9 +19,9 @@ namespace InvestLens.Application
             services.AddScoped<RefreshTokenService>();
             services.AddScoped<IFinancialImportService, FinancialImportService>();
             services.AddScoped<IFinancialUpdateService, FinancialUpdateService>();
-            services.AddSingleton<IFinancialFeatureAccess, ConservativeFinancialFeatureAccess>();
             services.AddScoped<IPlanoService, PlanoService>();
             services.AddScoped<IAssinaturaService, AssinaturaService>();
+            services.AddScoped<IFuncionalidadeService, FuncionalidadeService>();
             services.AddScoped<ISolicitacaoService, SolicitacaoService>();
 
             return services;

@@ -19,9 +19,11 @@ namespace InvestLens.Api.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddSingleton<IAuthorizationHandler, SameUserAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, FuncionalidadeAuthorizationHandler>();
 
             services.AddAuthorization(options =>
             {
+                options.AddPolicy("ConfiguracaoCriterios", policy => policy.RequireAuthenticatedUser().AddRequirements(new FuncionalidadeRequirement("CONFIGURACAO_CRITERIOS")));
                 options.AddPolicy(AuthorizationPolicies.SameUser, policy =>
                 {
                     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);

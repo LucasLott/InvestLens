@@ -24,6 +24,9 @@ breve e que a conta será criada no Free.
 ## Usuários autenticados e limitações
 
 Para usuários autenticados, selecionar um plano não redireciona para novo cadastro, não
-altera o plano da conta e não ativa assinatura. A página apenas apresenta uma mensagem de
-disponibilidade futura. Pagamentos, contratação e alteração de plano são dependências da
-Etapa 9 e permanecem fora deste escopo.
+altera o plano da conta e não ativa assinatura. Um plano pago segue para a página de
+intenção de contratação; a conclusão financeira permanece indisponível.
+
+A comparação consulta o catálogo público de funcionalidades. A página de contratação
+mostra o catálogo do Pro, enquanto Minha Assinatura consulta as permissões efetivas
+do usuário autenticado. Falhas de consulta não usam uma lista fixa como alternativa.

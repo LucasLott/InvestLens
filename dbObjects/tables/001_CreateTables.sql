@@ -1,7 +1,7 @@
 /*
   InvestLens: estrutura inicial e evoluções durante o desenvolvimento.
   Executar no banco de destino com SSMS ou sqlcmd (suporte a GO).
-  Interromper a execução no primeiro erro (sqlcmd -b).
+  Interromper a execução no primeiro erro e habilitar QUOTED_IDENTIFIER (sqlcmd -b -I).
   Não executar alterações de estrutura simultaneamente com gravações da aplicação.
 
   PK_<Tabela>; UK_<Tabela>_<Coluna>; FK_<Origem>_<Destino>;
@@ -1216,6 +1216,25 @@ BEGIN
 END;
 GO
 
+-- Periodicidade em meses; a carga inicial é executada apenas na criação da coluna.
+-- NULL significa que o plano ainda não possui periodicidade configurada.
+IF OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND COL_LENGTH('dbo.ILCAD002', 'QT_Meses_Periodicidade') IS NULL
+BEGIN
+  ALTER TABLE dbo.ILCAD002 ADD QT_Meses_Periodicidade INT NULL;
+  EXEC sys.sp_executesql N'UPDATE dbo.ILCAD002 SET QT_Meses_Periodicidade = 1 WHERE NM_Plano = ''Pro'' AND QT_Meses_Periodicidade IS NULL;';
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD002', 'U') IS NOT NULL
+  AND COL_LENGTH('dbo.ILCAD002', 'QT_Meses_Periodicidade') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE parent_object_id = OBJECT_ID('dbo.ILCAD002') AND name = 'CK_ILCAD002_Periodicidade')
+BEGIN
+  ALTER TABLE dbo.ILCAD002 WITH CHECK ADD CONSTRAINT CK_ILCAD002_Periodicidade
+    CHECK (QT_Meses_Periodicidade IS NULL OR QT_Meses_Periodicidade > 0);
+END;
+GO
+
 -- Em bancos existentes a associação é preenchida antes de se tornar obrigatória.
 IF OBJECT_ID('dbo.ILCAD001', 'U') IS NOT NULL
   AND COL_LENGTH('dbo.ILCAD001', 'ID_Plano') IS NULL
@@ -1427,4 +1446,46 @@ IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
   AND OBJECT_ID('dbo.ILCAD005', 'U') IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILCAD005')
   INSERT dbo.ILCAD000(NM_Fisico, NM_Logico) VALUES ('ILCAD005', 'Solicitações de assinatura');
+GO
+
+-- Cadastro de funcionalidades: N disponível para Free e Pro; S exclusivo Pro.
+IF OBJECT_ID('dbo.ILCAD006', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.ILCAD006
+  (
+    ID_Funcionalidade INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ILCAD006 PRIMARY KEY
+   ,NM_Funcionalidade VARCHAR(50) NOT NULL CONSTRAINT UK_ILCAD006_NM_Funcionalidade UNIQUE
+   ,SN_Pro CHAR(1) COLLATE Latin1_General_100_BIN2 NOT NULL CONSTRAINT CK_ILCAD006_SN_Pro CHECK (SN_Pro IN ('S', 'N'))
+  );
+END;
+GO
+
+IF OBJECT_ID('dbo.ILCAD006', 'U') IS NOT NULL
+BEGIN
+  INSERT dbo.ILCAD006 (NM_Funcionalidade, SN_Pro)
+  SELECT Inicial.Nome, Inicial.Pro
+  FROM (VALUES
+     ('BUSCA_ATIVOS', 'N')
+    ,('CONSULTA_ATIVOS', 'N')
+    ,('COTACAO_ATUAL', 'N')
+    ,('DADOS_BASICOS_EMPRESA', 'N')
+    ,('INDICADORES_BASICOS', 'N')
+    ,('CONFIGURACAO_CRITERIOS', 'N')
+    ,('INDICADORES_AVANCADOS', 'S')
+    ,('FILTROS_AVANCADOS', 'S')
+    ,('HISTORICO_DIVIDENDOS', 'S')
+    ,('HISTORICO_PRECOS', 'S')
+    ,('DADOS_FINANCEIROS', 'S')
+    ,('DEMONSTRACOES_FINANCEIRAS', 'S')
+    ,('PRECO_MAXIMO', 'S')
+    ,('ANALISE_FUNDAMENTALISTA', 'S')
+    ,('COMPARACAO_ATIVOS', 'S')
+  ) Inicial(Nome, Pro)
+  WHERE NOT EXISTS (SELECT 1 FROM dbo.ILCAD006 Atual WHERE Atual.NM_Funcionalidade = Inicial.Nome);
+END;
+
+IF OBJECT_ID('dbo.ILCAD000', 'U') IS NOT NULL
+  AND OBJECT_ID('dbo.ILCAD006', 'U') IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.ILCAD000 WHERE NM_Fisico = 'ILCAD006')
+  INSERT dbo.ILCAD000 (NM_Fisico, NM_Logico) VALUES ('ILCAD006', 'Funcionalidades');
 GO

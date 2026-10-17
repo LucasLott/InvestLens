@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import { planoService } from '../services/planoService';
 import type { Plano } from '../types/plano';
 import { Button } from '../components/ui/Button';
+import { Funcionalidades } from '../components/Funcionalidades';
 
 interface Assinatura {
   planoCadastrado: string;
@@ -89,7 +90,7 @@ export function MinhaAssinaturaPage() {
           <p>Situação: {assinatura.statusAssinatura ?? 'Sem assinatura paga'}</p>
           <p>Início: {data(assinatura.inicioVigencia)}</p>
           <p>Término: {data(assinatura.fimVigencia)}</p>
-          <p>As funcionalidades do plano estão indisponíveis para consulta no momento.</p>
+          <Funcionalidades modo="minhas" />
           <h2>Solicitações pendentes</h2>
           {solicitacoes.filter((item) => item.status === 'PEN').length === 0 ? (
             <p>Nenhuma solicitação pendente.</p>
